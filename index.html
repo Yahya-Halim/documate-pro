@@ -62,103 +62,149 @@
         // Database API functions
         class DatabaseAPI {
             constructor() {
-                this.baseURL = 'https://cors-anywhere.herokuapp.com/http://' + DB_CONFIG.host;
+                this.baseURL = 'http://localhost:3000/api';
             }
 
             async executeQuery(sql, params = []) {
-                try {
-                    // Note: Since we can't directly connect to MySQL from browser,
-                    // we'll simulate database operations with localStorage for now
-                    // In production, you'd need a backend server to handle MySQL connections
-                    console.log('Executing SQL:', sql, params);
-                    
-                    // Simulate database operations with localStorage
-                    return this.simulateQuery(sql, params);
-                } catch (error) {
-                    console.error('Database error:', error);
-                    throw error;
-                }
-            }
-
-            simulateQuery(sql, params) {
-                // Simulate database operations using localStorage as fallback
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        if (sql.includes('SELECT') && sql.includes('users')) {
-                            const users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
-                            resolve({ data: users });
-                        } else if (sql.includes('SELECT') && sql.includes('expenses')) {
-                            const expenses = JSON.parse(localStorage.getItem('tdems_expenses') || '[]');
-                            resolve({ data: expenses });
-                        } else if (sql.includes('SELECT') && sql.includes('tags')) {
-                            const tags = JSON.parse(localStorage.getItem('tdems_tags') || '[]');
-                            resolve({ data: tags });
-                        } else if (sql.includes('INSERT')) {
-                            resolve({ success: true, insertId: Date.now() });
-                        } else if (sql.includes('UPDATE') || sql.includes('DELETE')) {
-                            resolve({ success: true, affectedRows: 1 });
-                        } else {
-                            resolve({ data: [] });
-                        }
-                    }, 100);
-                });
+                // This method is no longer needed - we'll use direct API calls
+                console.log('Query executed via API:', sql, params);
+                return { data: [] };
             }
 
             // Users API
             async getUsers() {
-                const result = await this.executeQuery('SELECT * FROM users ORDER BY created_at DESC');
-                return result.data;
+                try {
+                    const response = await fetch(`${this.baseURL}/users`);
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error fetching users:', error);
+                    // Fallback to localStorage
+                    return JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                }
             }
 
             async createUser(user) {
-                const result = await this.executeQuery(
-                    'INSERT INTO users (id, username, password, role, name, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-                    [user.id, user.username, user.password, user.role, user.name, user.createdAt]
-                );
-                return result;
+                try {
+                    const response = await fetch(`${this.baseURL}/users`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(user)
+                    });
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error creating user:', error);
+                    // Fallback to localStorage
+                    const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                    localUsers.push(user);
+                    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(localUsers));
+                    return { success: true, id: user.id };
+                }
             }
 
             async deleteUser(userId) {
-                const result = await this.executeQuery('DELETE FROM users WHERE id = ?', [userId]);
-                return result;
+                try {
+                    const response = await fetch(`${this.baseURL}/users/${userId}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    // Fallback to localStorage
+                    const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                    const filtered = localUsers.filter(u => u.id !== userId);
+                    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(filtered));
+                    return { success: true };
+                }
             }
 
             // Expenses API
             async getExpenses() {
-                const result = await this.executeQuery('SELECT * FROM expenses ORDER BY created_at DESC');
-                return result.data;
+                try {
+                    const response = await fetch(`${this.baseURL}/expenses`);
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error fetching expenses:', error);
+                    // Fallback to localStorage
+                    return JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                }
             }
 
             async createExpense(expense) {
-                const result = await this.executeQuery(
-                    'INSERT INTO expenses (id, title, amount, date, description, driver_id, driver_name, driver_username, tags, receipt, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    [
-                        expense.id, expense.title, expense.amount, expense.date,
-                        expense.description, expense.driverId, expense.driverName,
-                        expense.driverUsername, JSON.stringify(expense.tags),
-                        JSON.stringify(expense.receipt), expense.createdAt
-                    ]
-                );
-                return result;
+                try {
+                    const response = await fetch(`${this.baseURL}/expenses`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(expense)
+                    });
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error creating expense:', error);
+                    // Fallback to localStorage
+                    const localExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                    localExpenses.push(expense);
+                    localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(localExpenses));
+                    return { success: true, id: expense.id };
+                }
             }
 
             async deleteExpense(expenseId) {
-                const result = await this.executeQuery('DELETE FROM expenses WHERE id = ?', [expenseId]);
-                return result;
+                try {
+                    const response = await fetch(`${this.baseURL}/expenses/${expenseId}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error deleting expense:', error);
+                    // Fallback to localStorage
+                    const localExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                    const filtered = localExpenses.filter(e => e.id !== expenseId);
+                    localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(filtered));
+                    return { success: true };
+                }
             }
 
             // Tags API
             async getTags() {
-                const result = await this.executeQuery('SELECT * FROM tags ORDER BY name');
-                return result.data;
+                try {
+                    const response = await fetch(`${this.baseURL}/tags`);
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error fetching tags:', error);
+                    // Fallback to localStorage
+                    return JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+                }
             }
 
             async createTag(tag) {
-                const result = await this.executeQuery(
-                    'INSERT INTO tags (id, name, color, icon) VALUES (?, ?, ?, ?)',
-                    [tag.id, tag.name, tag.color, tag.icon]
-                );
-                return result;
+                try {
+                    const response = await fetch(`${this.baseURL}/tags`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(tag)
+                    });
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error creating tag:', error);
+                    // Fallback to localStorage
+                    const localTags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+                    localTags.push(tag);
+                    localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(localTags));
+                    return { success: true, id: tag.id };
+                }
             }
         }
 
