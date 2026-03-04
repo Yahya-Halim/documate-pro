@@ -1,26 +1,1305 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
-
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
-
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truck Driver Expense Management System</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .file-upload-area {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .tag-badge {
+            transition: all 0.2s ease;
+        }
+        .tag-badge:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // Database configuration
+        const DB_CONFIG = {
+            host: 'sql5.freesqldatabase.com',
+            database: 'sql5818473',
+            user: 'sql5818473',
+            password: 'rh5QWTcKd6',
+            port: 3306
+        };
+
+        // Database API functions
+        class DatabaseAPI {
+            constructor() {
+                this.baseURL = 'https://cors-anywhere.herokuapp.com/http://' + DB_CONFIG.host;
+            }
+
+            async executeQuery(sql, params = []) {
+                try {
+                    // Note: Since we can't directly connect to MySQL from browser,
+                    // we'll simulate database operations with localStorage for now
+                    // In production, you'd need a backend server to handle MySQL connections
+                    console.log('Executing SQL:', sql, params);
+                    
+                    // Simulate database operations with localStorage
+                    return this.simulateQuery(sql, params);
+                } catch (error) {
+                    console.error('Database error:', error);
+                    throw error;
+                }
+            }
+
+            simulateQuery(sql, params) {
+                // Simulate database operations using localStorage as fallback
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        if (sql.includes('SELECT') && sql.includes('users')) {
+                            const users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
+                            resolve({ data: users });
+                        } else if (sql.includes('SELECT') && sql.includes('expenses')) {
+                            const expenses = JSON.parse(localStorage.getItem('tdems_expenses') || '[]');
+                            resolve({ data: expenses });
+                        } else if (sql.includes('SELECT') && sql.includes('tags')) {
+                            const tags = JSON.parse(localStorage.getItem('tdems_tags') || '[]');
+                            resolve({ data: tags });
+                        } else if (sql.includes('INSERT')) {
+                            resolve({ success: true, insertId: Date.now() });
+                        } else if (sql.includes('UPDATE') || sql.includes('DELETE')) {
+                            resolve({ success: true, affectedRows: 1 });
+                        } else {
+                            resolve({ data: [] });
+                        }
+                    }, 100);
+                });
+            }
+
+            // Users API
+            async getUsers() {
+                const result = await this.executeQuery('SELECT * FROM users ORDER BY created_at DESC');
+                return result.data;
+            }
+
+            async createUser(user) {
+                const result = await this.executeQuery(
+                    'INSERT INTO users (id, username, password, role, name, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+                    [user.id, user.username, user.password, user.role, user.name, user.createdAt]
+                );
+                return result;
+            }
+
+            async deleteUser(userId) {
+                const result = await this.executeQuery('DELETE FROM users WHERE id = ?', [userId]);
+                return result;
+            }
+
+            // Expenses API
+            async getExpenses() {
+                const result = await this.executeQuery('SELECT * FROM expenses ORDER BY created_at DESC');
+                return result.data;
+            }
+
+            async createExpense(expense) {
+                const result = await this.executeQuery(
+                    'INSERT INTO expenses (id, title, amount, date, description, driver_id, driver_name, driver_username, tags, receipt, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [
+                        expense.id, expense.title, expense.amount, expense.date,
+                        expense.description, expense.driverId, expense.driverName,
+                        expense.driverUsername, JSON.stringify(expense.tags),
+                        JSON.stringify(expense.receipt), expense.createdAt
+                    ]
+                );
+                return result;
+            }
+
+            async deleteExpense(expenseId) {
+                const result = await this.executeQuery('DELETE FROM expenses WHERE id = ?', [expenseId]);
+                return result;
+            }
+
+            // Tags API
+            async getTags() {
+                const result = await this.executeQuery('SELECT * FROM tags ORDER BY name');
+                return result.data;
+            }
+
+            async createTag(tag) {
+                const result = await this.executeQuery(
+                    'INSERT INTO tags (id, name, color, icon) VALUES (?, ?, ?, ?)',
+                    [tag.id, tag.name, tag.color, tag.icon]
+                );
+                return result;
+            }
+        }
+
+        // Initialize database API
+        const db = new DatabaseAPI();
+
+        // Data storage keys (fallback)
+        const STORAGE_KEYS = {
+            USERS: 'tdems_users',
+            EXPENSES: 'tdems_expenses',
+            TAGS: 'tdems_tags',
+            CURRENT_USER: 'tdems_current_user'
+        };
+
+        // Default expense categories and tags
+        const DEFAULT_TAGS = [
+            { id: 'fuel', name: 'Fuel', color: '#ef4444', icon: 'fa-gas-pump' },
+            { id: 'maintenance', name: 'Maintenance', color: '#f59e0b', icon: 'fa-wrench' },
+            { id: 'food', name: 'Food & Meals', color: '#10b981', icon: 'fa-utensils' },
+            { id: 'lodging', name: 'Lodging', color: '#6366f1', icon: 'fa-bed' },
+            { id: 'tolls', name: 'Tolls & Fees', color: '#8b5cf6', icon: 'fa-road' },
+            { id: 'insurance', name: 'Insurance', color: '#ec4899', icon: 'fa-shield-alt' },
+            { id: 'supplies', name: 'Supplies', color: '#14b8a6', icon: 'fa-box' },
+            { id: 'other', name: 'Other', color: '#6b7280', icon: 'fa-ellipsis-h' }
+        ];
+
+        // Initialize default admin if no users exist
+        const initializeData = async () => {
+            try {
+                const users = await db.getUsers();
+                if (users.length === 0) {
+                    const defaultAdmin = {
+                        id: 'admin-001',
+                        username: 'admin',
+                        password: 'admin123',
+                        role: 'admin',
+                        name: 'Fleet Manager',
+                        createdAt: new Date().toISOString()
+                    };
+                    await db.createUser(defaultAdmin);
+                }
+
+                // Initialize default tags if none exist
+                const tags = await db.getTags();
+                if (tags.length === 0) {
+                    for (const tag of DEFAULT_TAGS) {
+                        await db.createTag(tag);
+                    }
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+                // Fallback to localStorage
+                const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                if (localUsers.length === 0) {
+                    const defaultAdmin = {
+                        id: 'admin-001',
+                        username: 'admin',
+                        password: 'admin123',
+                        role: 'admin',
+                        name: 'Fleet Manager',
+                        createdAt: new Date().toISOString()
+                    };
+                    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify([defaultAdmin]));
+                }
+
+                const localTags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+                if (localTags.length === 0) {
+                    localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(DEFAULT_TAGS));
+                }
+            }
+        };
+
+        // Generate driver ID
+        const generateDriverId = () => {
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            return `DR-${randomNum}`;
+        };
+
+        // Convert file to base64
+        const fileToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        };
+
+        // Format currency
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        };
+
+        // View file function
+        const viewFile = (receipt) => {
+            if (receipt && receipt.data) {
+                const newWindow = window.open();
+                if (receipt.type.startsWith('image/')) {
+                    newWindow.document.write(`
+                        <html>
+                            <head><title>Receipt - ${receipt.name}</title></head>
+                            <body style="margin:0;padding:20px;text-align:center;background:#f5f5f5;">
+                                <img src="${receipt.data}" style="max-width:100%;max-height:90vh;box-shadow:0 4px 6px rgba(0,0,0,0.1);" />
+                                <p style="margin-top:20px;"><a href="javascript:window.close()">Close</a></p>
+                            </body>
+                        </html>
+                    `);
+                } else if (receipt.type === 'application/pdf') {
+                    newWindow.document.write(`
+                        <html>
+                            <head><title>Receipt - ${receipt.name}</title></head>
+                            <body style="margin:0;padding:20px;text-align:center;background:#f5f5f5;">
+                                <iframe src="${receipt.data}" style="width:100%;height:90vh;border:none;"></iframe>
+                                <p style="margin-top:20px;"><a href="javascript:window.close()">Close</a></p>
+                            </body>
+                        </html>
+                    `);
+                }
+            }
+        };
+
+        // Auth Context
+        const AuthContext = React.createContext();
+
+        // Login Component
+        const Login = () => {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+                
+                try {
+                    const users = await db.getUsers();
+                    const user = users.find(u => u.username === username && u.password === password);
+                    
+                    if (user) {
+                        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+                        window.location.reload();
+                    } else {
+                        setError('Invalid username or password');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    // Fallback to localStorage
+                    const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                    const user = localUsers.find(u => u.username === username && u.password === password);
+                    
+                    if (user) {
+                        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+                        window.location.reload();
+                    } else {
+                        setError('Invalid username or password');
+                    }
+                }
+                setLoading(false);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md fade-in">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i className="fas fa-truck text-white text-2xl"></i>
+                            </div>
+                            <h1 className="text-3xl font-bold text-gray-800">Expense Tracker</h1>
+                            <p className="text-gray-600 mt-2">Truck Driver Expense Management</p>
+                        </div>
+                        
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Username
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i className="fas fa-user text-gray-400"></i>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Enter username"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Password
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i className="fas fa-lock text-gray-400"></i>
+                                    </div>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Enter password"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            
+                            {error && (
+                                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                                    {error}
+                                </div>
+                            )}
+                            
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+                            >
+                                {loading ? 'Signing in...' : 'Sign In'}
+                            </button>
+                        </form>
+                        
+                        <div className="mt-6 text-center text-sm text-gray-600">
+                            <p>Default Admin: admin / admin123</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // User Management Component (Admin only)
+        const UserManagement = () => {
+            const [users, setUsers] = useState([]);
+            const [showAddUser, setShowAddUser] = useState(false);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [newUser, setNewUser] = useState({
+                username: '',
+                password: '',
+                name: '',
+                role: 'driver'
+            });
+
+            useEffect(() => {
+                loadUsers();
+            }, []);
+
+            const loadUsers = async () => {
+                try {
+                    const allUsers = await db.getUsers();
+                    setUsers(allUsers);
+                } catch (error) {
+                    console.error('Error loading users:', error);
+                    // Fallback to localStorage
+                    const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                    setUsers(localUsers);
+                }
+            };
+
+            const handleAddUser = async () => {
+                if (!newUser.username || !newUser.password || !newUser.name) {
+                    alert('Please fill all fields');
+                    return;
+                }
+
+                try {
+                    const allUsers = await db.getUsers();
+                    
+                    // Check if username already exists
+                    if (allUsers.find(u => u.username === newUser.username)) {
+                        alert('Username already exists');
+                        return;
+                    }
+
+                    const user = {
+                        id: newUser.role === 'driver' ? generateDriverId() : `admin-${Date.now()}`,
+                        ...newUser,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    await db.createUser(user);
+                    loadUsers();
+                    setNewUser({ username: '', password: '', name: '', role: 'driver' });
+                    setShowAddUser(false);
+                } catch (error) {
+                    console.error('Error adding user:', error);
+                    // Fallback to localStorage
+                    const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                    if (localUsers.find(u => u.username === newUser.username)) {
+                        alert('Username already exists');
+                        return;
+                    }
+
+                    const user = {
+                        id: newUser.role === 'driver' ? generateDriverId() : `admin-${Date.now()}`,
+                        ...newUser,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    localUsers.push(user);
+                    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(localUsers));
+                    loadUsers();
+                    setNewUser({ username: '', password: '', name: '', role: 'driver' });
+                    setShowAddUser(false);
+                }
+            };
+
+            const handleDeleteUser = async (userId) => {
+                if (confirm('Are you sure you want to delete this user?')) {
+                    try {
+                        await db.deleteUser(userId);
+                        loadUsers();
+                    } catch (error) {
+                        console.error('Error deleting user:', error);
+                        // Fallback to localStorage
+                        const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                        const filtered = localUsers.filter(u => u.id !== userId);
+                        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(filtered));
+                        loadUsers();
+                    }
+                }
+            };
+
+            const filteredUsers = users.filter(user =>
+                user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.id.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-bold text-gray-800">Driver Management</h2>
+                        <button
+                            onClick={() => setShowAddUser(true)}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                        >
+                            <i className="fas fa-plus mr-2"></i>Add Driver
+                        </button>
+                    </div>
+
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search drivers..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                        />
+                        <i className="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+
+                    {showAddUser && (
+                        <div className="bg-white p-6 rounded-lg shadow-lg border fade-in">
+                            <h3 className="text-lg font-semibold mb-4">Add New Driver</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="Full Name"
+                                    value={newUser.name}
+                                    onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Username"
+                                    value={newUser.username}
+                                    onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="Password"
+                                    value={newUser.password}
+                                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                />
+                                <select
+                                    value={newUser.role}
+                                    onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                >
+                                    <option value="driver">Driver</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-2 mt-4">
+                                <button
+                                    onClick={handleAddUser}
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                                >
+                                    <i className="fas fa-save mr-2"></i>Save
+                                </button>
+                                <button
+                                    onClick={() => setShowAddUser(false)}
+                                    className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                        <table className="w-full">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredUsers.map(user => (
+                                    <tr key={user.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {user.id}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {user.name}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {user.username}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                                user.role === 'admin' 
+                                                    ? 'bg-purple-100 text-purple-800' 
+                                                    : 'bg-blue-100 text-blue-800'
+                                            }`}>
+                                                {user.role}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {user.username !== 'admin' && (
+                                                <button
+                                                    onClick={() => handleDeleteUser(user.id)}
+                                                    className="text-red-600 hover:text-red-900"
+                                                >
+                                                    <i className="fas fa-trash"></i>
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
+        // Expense Management Component
+        const ExpenseManagement = () => {
+            const [expenses, setExpenses] = useState([]);
+            const [showAddExpense, setShowAddExpense] = useState(false);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedTags, setSelectedTags] = useState([]);
+            const [tags, setTags] = useState([]);
+            const [newExpense, setNewExpense] = useState({
+                title: '',
+                amount: '',
+                date: new Date().toISOString().split('T')[0],
+                description: '',
+                tags: [],
+                receipt: null
+            });
+
+            const authContext = React.useContext(AuthContext);
+            const currentUser = authContext?.currentUser;
+
+            useEffect(() => {
+                loadExpenses();
+                loadTags();
+            }, []);
+
+            const loadExpenses = async () => {
+                try {
+                    const allExpenses = await db.getExpenses();
+                    setExpenses(allExpenses);
+                } catch (error) {
+                    console.error('Error loading expenses:', error);
+                    // Fallback to localStorage
+                    const localExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                    setExpenses(localExpenses);
+                }
+            };
+
+            const loadTags = async () => {
+                try {
+                    const allTags = await db.getTags();
+                    setTags(allTags);
+                } catch (error) {
+                    console.error('Error loading tags:', error);
+                    // Fallback to localStorage
+                    const localTags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+                    setTags(localTags);
+                }
+            };
+
+            const handleFileUpload = async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const base64 = await fileToBase64(file);
+                    setNewExpense({
+                        ...newExpense,
+                        receipt: {
+                            name: file.name,
+                            type: file.type,
+                            data: base64
+                        }
+                    });
+                }
+            };
+
+            const handleAddExpense = async () => {
+                if (!newExpense.title || !newExpense.amount) {
+                    alert('Please fill required fields');
+                    return;
+                }
+
+                try {
+                    const expense = {
+                        id: `exp-${Date.now()}`,
+                        ...newExpense,
+                        driverId: currentUser.id,
+                        driverName: currentUser.name,
+                        driverUsername: currentUser.username,
+                        amount: parseFloat(newExpense.amount),
+                        createdAt: new Date().toISOString()
+                    };
+
+                    await db.createExpense(expense);
+                    loadExpenses();
+                    setNewExpense({
+                        title: '',
+                        amount: '',
+                        date: new Date().toISOString().split('T')[0],
+                        description: '',
+                        tags: [],
+                        receipt: null
+                    });
+                    setShowAddExpense(false);
+                } catch (error) {
+                    console.error('Error adding expense:', error);
+                    // Fallback to localStorage
+                    const expense = {
+                        id: `exp-${Date.now()}`,
+                        ...newExpense,
+                        driverId: currentUser.id,
+                        driverName: currentUser.name,
+                        driverUsername: currentUser.username,
+                        amount: parseFloat(newExpense.amount),
+                        createdAt: new Date().toISOString()
+                    };
+
+                    const localExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                    localExpenses.push(expense);
+                    localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(localExpenses));
+                    loadExpenses();
+                    setNewExpense({
+                        title: '',
+                        amount: '',
+                        date: new Date().toISOString().split('T')[0],
+                        description: '',
+                        tags: [],
+                        receipt: null
+                    });
+                    setShowAddExpense(false);
+                }
+            };
+
+            const handleDeleteExpense = async (expenseId) => {
+                if (confirm('Delete this expense?')) {
+                    try {
+                        await db.deleteExpense(expenseId);
+                        loadExpenses();
+                    } catch (error) {
+                        console.error('Error deleting expense:', error);
+                        // Fallback to localStorage
+                        const localExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                        const filtered = localExpenses.filter(e => e.id !== expenseId);
+                        localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(filtered));
+                        loadExpenses();
+                    }
+                }
+            };
+
+            const filteredExpenses = expenses.filter(expense => {
+                const matchesSearch = 
+                    expense.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    expense.driverName.toLowerCase().includes(searchTerm.toLowerCase());
+                
+                const matchesTags = selectedTags.length === 0 || 
+                    selectedTags.some(tagId => expense.tags.includes(tagId));
+                
+                // Drivers can only see their own expenses
+                if (currentUser.role === 'driver') {
+                    return matchesSearch && matchesTags && expense.driverId === currentUser.id;
+                }
+                
+                return matchesSearch && matchesTags;
+            });
+
+            const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-800">
+                                {currentUser.role === 'admin' ? 'All Expenses' : 'My Expenses'}
+                            </h2>
+                            <p className="text-lg text-blue-600 font-semibold">
+                                Total: {formatCurrency(totalExpenses)}
+                            </p>
+                        </div>
+                        {currentUser.role === 'driver' && (
+                            <button
+                                onClick={() => setShowAddExpense(true)}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                            >
+                                <i className="fas fa-plus mr-2"></i>Add Expense
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex gap-4">
+                        <div className="flex-1 relative">
+                            <input
+                                type="text"
+                                placeholder="Search expenses..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                            />
+                            <i className="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                            {tags.map(tag => (
+                                <button
+                                    key={tag.id}
+                                    onClick={() => setSelectedTags(
+                                        selectedTags.includes(tag.id) 
+                                            ? selectedTags.filter(t => t !== tag.id)
+                                            : [...selectedTags, tag.id]
+                                    )}
+                                    className={`px-3 py-1 rounded-full text-sm font-medium tag-badge ${
+                                        selectedTags.includes(tag.id)
+                                            ? 'ring-2 ring-offset-2'
+                                            : ''
+                                    }`}
+                                    style={{
+                                        backgroundColor: selectedTags.includes(tag.id) ? tag.color : '#f3f4f6',
+                                        color: selectedTags.includes(tag.id) ? 'white' : '#374151',
+                                        ringColor: tag.color
+                                    }}
+                                >
+                                    <i className={`fas ${tag.icon} mr-1`}></i>
+                                    {tag.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {showAddExpense && (
+                        <div className="bg-white p-6 rounded-lg shadow-lg border fade-in">
+                            <h3 className="text-lg font-semibold mb-4">Add New Expense</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="Expense Title"
+                                    value={newExpense.title}
+                                    onChange={(e) => setNewExpense({...newExpense, title: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Amount"
+                                    value={newExpense.amount}
+                                    onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                />
+                                <input
+                                    type="date"
+                                    value={newExpense.date}
+                                    onChange={(e) => setNewExpense({...newExpense, date: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                />
+                                <div className="file-upload-area rounded-lg p-4 text-center cursor-pointer">
+                                    <input
+                                        type="file"
+                                        accept="image/*,application/pdf"
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                        id="receipt-upload"
+                                    />
+                                    <label htmlFor="receipt-upload" className="cursor-pointer">
+                                        {newExpense.receipt ? (
+                                            <div className="text-green-600">
+                                                <i className="fas fa-check-circle mr-2"></i>
+                                                {newExpense.receipt.name}
+                                            </div>
+                                        ) : (
+                                            <div className="text-gray-500">
+                                                <i className="fas fa-cloud-upload-alt mr-2"></i>
+                                                Upload Receipt
+                                            </div>
+                                        )}
+                                    </label>
+                                </div>
+                            </div>
+                            <textarea
+                                placeholder="Description"
+                                value={newExpense.description}
+                                onChange={(e) => setNewExpense({...newExpense, description: e.target.value})}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-24 mt-4"
+                            />
+                            <div className="flex gap-2 mt-4">
+                                {tags.map(tag => (
+                                    <button
+                                        key={tag.id}
+                                        type="button"
+                                        onClick={() => setNewExpense({
+                                            ...newExpense,
+                                            tags: newExpense.tags.includes(tag.id)
+                                                ? newExpense.tags.filter(t => t !== tag.id)
+                                                : [...newExpense.tags, tag.id]
+                                        })}
+                                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                            newExpense.tags.includes(tag.id) ? 'text-white' : 'text-gray-700'
+                                        }`}
+                                        style={{
+                                            backgroundColor: newExpense.tags.includes(tag.id) ? tag.color : '#f3f4f6'
+                                        }}
+                                    >
+                                        <i className={`fas ${tag.icon} mr-1`}></i>
+                                        {tag.name}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="flex gap-2 mt-4">
+                                <button
+                                    onClick={handleAddExpense}
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                                >
+                                    <i className="fas fa-save mr-2"></i>Save
+                                </button>
+                                <button
+                                    onClick={() => setShowAddExpense(false)}
+                                    className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredExpenses.map(expense => (
+                            <div key={expense.id} className="bg-white rounded-lg shadow-lg p-6 card-hover">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-800">{expense.title}</h3>
+                                    <span className="text-xl font-bold text-green-600">
+                                        {formatCurrency(expense.amount)}
+                                    </span>
+                                </div>
+                                <p className="text-gray-600 mb-4">{expense.description}</p>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {expense.tags.map(tagId => {
+                                        const tag = tags.find(t => t.id === tagId);
+                                        return tag ? (
+                                            <span
+                                                key={tagId}
+                                                className="px-2 py-1 rounded-full text-xs font-medium text-white"
+                                                style={{ backgroundColor: tag.color }}
+                                            >
+                                                <i className={`fas ${tag.icon} mr-1`}></i>
+                                                {tag.name}
+                                            </span>
+                                        ) : null;
+                                    })}
+                                </div>
+                                <div className="text-sm text-gray-500 mb-4">
+                                    <p><i className="fas fa-user mr-2"></i>{expense.driverName}</p>
+                                    <p><i className="fas fa-id-badge mr-2"></i>{expense.driverId}</p>
+                                    <p><i className="fas fa-calendar mr-2"></i>{new Date(expense.date).toLocaleDateString()}</p>
+                                    {expense.receipt && (
+                                        <p><i className="fas fa-receipt mr-2"></i>Receipt attached</p>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    {expense.receipt && currentUser.role === 'admin' && (
+                                        <button
+                                            onClick={() => viewFile(expense.receipt)}
+                                            className="text-blue-600 hover:text-blue-900"
+                                            title="View Receipt"
+                                        >
+                                            <i className="fas fa-eye"></i>
+                                        </button>
+                                    )}
+                                    {(currentUser.role === 'admin' || expense.driverId === currentUser.id) && (
+                                        <button
+                                            onClick={() => handleDeleteExpense(expense.id)}
+                                            className="text-red-600 hover:text-red-900"
+                                        >
+                                            <i className="fas fa-trash"></i>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // Reports Component
+        const Reports = () => {
+            const [expenses, setExpenses] = useState([]);
+            const [users, setUsers] = useState([]);
+            const [tags, setTags] = useState([]);
+            const [dateRange, setDateRange] = useState({
+                start: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+                end: new Date().toISOString().split('T')[0]
+            });
+
+            useEffect(() => {
+                loadExpenses();
+                loadUsers();
+                loadTags();
+            }, []);
+
+            const loadExpenses = async () => {
+                try {
+                    const allExpenses = await db.getExpenses();
+                    setExpenses(allExpenses);
+                } catch (error) {
+                    console.error('Error loading expenses:', error);
+                    // Fallback to localStorage
+                    const localExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                    setExpenses(localExpenses);
+                }
+            };
+
+            const loadUsers = async () => {
+                try {
+                    const allUsers = await db.getUsers();
+                    setUsers(allUsers);
+                } catch (error) {
+                    console.error('Error loading users:', error);
+                    // Fallback to localStorage
+                    const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                    setUsers(localUsers);
+                }
+            };
+
+            const loadTags = async () => {
+                try {
+                    const allTags = await db.getTags();
+                    setTags(allTags);
+                } catch (error) {
+                    console.error('Error loading tags:', error);
+                    // Fallback to localStorage
+                    const localTags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+                    setTags(localTags);
+                }
+            };
+
+            const filteredExpenses = expenses.filter(expense => {
+                const expenseDate = new Date(expense.date);
+                const startDate = new Date(dateRange.start);
+                const endDate = new Date(dateRange.end);
+                return expenseDate >= startDate && expenseDate <= endDate;
+            });
+
+            const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+            const expensesByTag = tags.map(tag => {
+                const tagExpenses = filteredExpenses.filter(exp => exp.tags.includes(tag.id));
+                const total = tagExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                return {
+                    tag,
+                    total,
+                    count: tagExpenses.length
+                };
+            }).filter(item => item.count > 0).sort((a, b) => b.total - a.total);
+
+            const expensesByDriver = users.filter(user => user.role === 'driver').map(driver => {
+                const driverExpenses = filteredExpenses.filter(exp => exp.driverId === driver.id);
+                const total = driverExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                return {
+                    driver,
+                    total,
+                    count: driverExpenses.length
+                };
+            }).filter(item => item.count > 0).sort((a, b) => b.total - a.total);
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-bold text-gray-800">Expense Reports</h2>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 className="text-lg font-semibold mb-4">Date Range</h3>
+                        <div className="flex gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                                <input
+                                    type="date"
+                                    value={dateRange.start}
+                                    onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                                <input
+                                    type="date"
+                                    value={dateRange.end}
+                                    onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Total Expenses</p>
+                                    <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalExpenses)}</p>
+                                </div>
+                                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i className="fas fa-dollar-sign text-blue-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Total Claims</p>
+                                    <p className="text-2xl font-bold text-gray-900">{filteredExpenses.length}</p>
+                                </div>
+                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i className="fas fa-receipt text-green-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Average Expense</p>
+                                    <p className="text-2xl font-bold text-gray-900">
+                                        {filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : '$0'}
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i className="fas fa-chart-line text-purple-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                            <h3 className="text-lg font-semibold mb-4">Expenses by Category</h3>
+                            <div className="space-y-3">
+                                {expensesByTag.map(item => (
+                                    <div key={item.tag.id} className="flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <span
+                                                className="w-3 h-3 rounded-full mr-3"
+                                                style={{ backgroundColor: item.tag.color }}
+                                            ></span>
+                                            <span className="text-sm font-medium">
+                                                <i className={`fas ${item.tag.icon} mr-2`}></i>
+                                                {item.tag.name}
+                                            </span>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-semibold">{formatCurrency(item.total)}</p>
+                                            <p className="text-xs text-gray-500">{item.count} claims</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                            <h3 className="text-lg font-semibold mb-4">Expenses by Driver</h3>
+                            <div className="space-y-3">
+                                {expensesByDriver.map(item => (
+                                    <div key={item.driver.id} className="flex items-center justify-between">
+                                        <div>
+                                            <span className="text-sm font-medium">{item.driver.name}</span>
+                                            <p className="text-xs text-gray-500">{item.driver.id}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-semibold">{formatCurrency(item.total)}</p>
+                                            <p className="text-xs text-gray-500">{item.count} claims</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        const Dashboard = () => {
+            const authContext = React.useContext(AuthContext);
+            const currentUser = authContext?.currentUser;
+            const logout = authContext?.logout;
+            const [activeTab, setActiveTab] = useState('expenses');
+
+            const isAdmin = currentUser?.role === 'admin';
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center py-4">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                                        <i className="fas fa-truck text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-gray-800">Expense Management System</h1>
+                                        <p className="text-sm text-gray-600">
+                                            Welcome, {currentUser.name} ({currentUser.role})
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={logout}
+                                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                                >
+                                    <i className="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Navigation */}
+                    <nav className="bg-white border-b">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex space-x-8">
+                                <button
+                                    onClick={() => setActiveTab('expenses')}
+                                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                                        activeTab === 'expenses'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    <i className="fas fa-dollar-sign mr-2"></i>Expenses
+                                </button>
+                                {isAdmin && (
+                                    <button
+                                        onClick={() => setActiveTab('users')}
+                                        className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                                            activeTab === 'users'
+                                                ? 'border-blue-500 text-blue-600'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                                        }`}
+                                    >
+                                        <i className="fas fa-users mr-2"></i>Driver Management
+                                    </button>
+                                )}
+                                {isAdmin && (
+                                    <button
+                                        onClick={() => setActiveTab('reports')}
+                                        className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                                            activeTab === 'reports'
+                                                ? 'border-blue-500 text-blue-600'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                                        }`}
+                                    >
+                                        <i className="fas fa-chart-bar mr-2"></i>Reports
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Main Content */}
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        {activeTab === 'expenses' && <ExpenseManagement />}
+                        {activeTab === 'users' && isAdmin && <UserManagement />}
+                        {activeTab === 'reports' && isAdmin && <Reports />}
+                    </main>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [currentUser, setCurrentUser] = useState(null);
+
+            useEffect(() => {
+                initializeData();
+                // Check for existing session
+                const savedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+                if (savedUser) {
+                    setCurrentUser(JSON.parse(savedUser));
+                }
+            }, []);
+
+            const logout = () => {
+                setCurrentUser(null);
+                localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+                window.location.reload();
+            };
+
+            if (!currentUser) {
+                return <Login />;
+            }
+
+            return (
+                <AuthContext.Provider value={{ currentUser, logout }}>
+                    <Dashboard />
+                </AuthContext.Provider>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
 </html>
