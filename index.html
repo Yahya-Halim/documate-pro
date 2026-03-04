@@ -4,80 +4,384 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Truck Driver Expense Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10b981',
+                        secondary: '#059669',
+                        accent: '#047857',
+                        dark: '#000000',
+                        light: '#ffffff'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .login-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .login-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 400px; text-align: center; }
-        .logo { font-size: 48px; color: #007bff; margin-bottom: 20px; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        .btn { width: 100%; padding: 14px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn:hover { background: #0056b3; }
-        .error { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #f5c6cb; }
-        .dashboard { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
-        .header h1 { color: #333; margin: 0; }
-        .header .user-info { color: #666; font-size: 14px; }
-        .logout-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-        .expense-form { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .form-row-full { margin-bottom: 20px; }
-        .tag-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .tag-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 20px; cursor: pointer; }
-        .tag-btn.active { background: #007bff; color: white; border-color: #007bff; }
-        .expense-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
-        .expense-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; }
-        .expense-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; }
-        .expense-title { font-size: 18px; font-weight: bold; color: #333; margin: 0; }
-        .expense-amount { font-size: 20px; font-weight: bold; color: #28a745; }
-        .expense-description { color: #666; margin-bottom: 15px; }
-        .expense-meta { font-size: 14px; color: #999; margin-bottom: 15px; }
-        .expense-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .expense-tag { background: #e9ecef; color: #495057; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
-        .expense-actions { display: flex; gap: 10px; }
-        .action-btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
-        .delete-btn { background: #dc3545; color: white; }
-        .search-bar { display: flex; gap: 15px; margin-bottom: 30px; align-items: center; }
-        .search-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        .add-expense-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .total-display { background: #28a745; color: white; padding: 20px; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 30px; }
-        .hidden { display: none; }
-        .flex { display: flex; gap: 10px; }
+        /* modern clean styling – perfect layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        /* main app card */
+        #app {
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* glassmorphism effect for inner containers */
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
+            border-radius: 2.5rem;
+            box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.1) inset;
+            overflow: hidden;
+        }
+
+        /* login card specific */
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
+            border-radius: 2.5rem;
+            box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.3);
+            padding: 3rem;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        /* tabs with underline animation */
+        .tab-btn {
+            position: relative;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            color: #64748b;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn.active {
+            color: #10b981;
+            border-bottom-color: #10b981;
+            background: linear-gradient(to top, #ecfdf5, transparent);
+        }
+
+        /* form elements consistent */
+        input, select, textarea {
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 1rem !important;
+            padding: 0.875rem 1.25rem !important;
+            font-size: 1rem !important;
+            transition: all 0.15s !important;
+            background: white !important;
+            color: #0f172a !important;
+            width: 100%;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #10b981 !important;
+            outline: none !important;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+        }
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+
+        /* buttons */
+        .btn-primary {
+            background: #10b981;
+            color: white;
+            font-weight: 700;
+            padding: 0.875rem 2rem;
+            border-radius: 3rem;
+            transition: all 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 0.875rem 2rem;
+            border-radius: 3rem;
+            transition: all 0.2s;
+            border: 2px solid #cbd5e1;
+            cursor: pointer;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: scale(1.02);
+        }
+
+        /* expense cards */
+        .expense-card {
+            background: white;
+            border-radius: 2rem;
+            padding: 1.75rem;
+            box-shadow: 0 8px 20px -6px rgba(0,0,0,0.1);
+            transition: all 0.25s;
+            border: 1px solid #f1f5f9;
+            position: relative;
+            overflow: hidden;
+        }
+        .expense-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 30px -12px rgba(16, 185, 129, 0.25);
+            border-color: #10b981;
+        }
+        .expense-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        /* tag chips */
+        .tag-chip {
+            display: inline-block;
+            padding: 0.35rem 1rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: 0.1s;
+        }
+        .filter-tag {
+            padding: 0.6rem 1.5rem;
+            border-radius: 100px;
+            font-weight: 600;
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-tag.active {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+
+        /* file upload area */
+        .file-drop {
+            border: 2px dashed #cbd5e1;
+            border-radius: 1.5rem;
+            background: #f8fafc;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .file-drop:hover {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        /* user & tag cards */
+        .grid-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.04);
+            border: 1px solid #eef2f6;
+            transition: 0.2s;
+        }
+        .grid-card:hover {
+            border-color: #10b981;
+        }
+
+        /* total display */
+        .total-badge {
+            background: linear-gradient(145deg, #10b981, #047857);
+            color: white;
+            border-radius: 2rem;
+            padding: 1.5rem 2.5rem;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            box-shadow: 0 15px 30px -10px #10b981;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        /* layout helpers */
+        .hidden {
+            display: none !important;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gap-2 { gap: 0.75rem; }
+        .gap-3 { gap: 1.25rem; }
+        
+        /* animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake-animation {
+            animation: shake 0.5s;
+        }
     </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Content will be inserted here -->
-    </div>
+    <div id="app"></div>
 
     <script>
         // Simple state management
         var currentUser = null;
         var expenses = [];
-        var tags = [
-            { id: 'fuel', name: 'Fuel', color: '#dc3545' },
-            { id: 'maintenance', name: 'Maintenance', color: '#fd7e14' },
-            { id: 'food', name: 'Food', color: '#28a745' },
-            { id: 'lodging', name: 'Lodging', color: '#17a2b8' },
-            { id: 'tolls', name: 'Tolls', color: '#6f42c1' },
-            { id: 'insurance', name: 'Insurance', color: '#e83e8c' },
-            { id: 'supplies', name: 'Supplies', color: '#6610f2' },
-            { id: 'other', name: 'Other', color: '#6c757d' }
-        ];
+        var users = [];
+        var tags = [];
+        var availableColors = ['#dc3545', '#fd7e14', '#28a745', '#17a2b8', '#6f42c1', '#e83e8c', '#6610f2', '#6c757d', '#007bff', '#20c997'];
+        var selectedTags = [];
+        var selectedFilterTags = [];
+        var selectedTagColor = '#007bff';
+        var uploadedFile = null;
+        var editingUserId = null;
+
+        // Database simulation
+        const db = {
+            async executeQuery(sql, params = []) {
+                console.log('Executing query:', sql, params);
+                
+                if (sql.includes('SELECT') && sql.includes('users')) {
+                    const users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
+                    return { success: true, data: users };
+                }
+                
+                if (sql.includes('SELECT') && sql.includes('expenses')) {
+                    const expenses = JSON.parse(localStorage.getItem('tdems_expenses') || '[]');
+                    return { success: true, data: expenses };
+                }
+                
+                if (sql.includes('SELECT') && sql.includes('tags')) {
+                    const tags = JSON.parse(localStorage.getItem('tdems_tags') || '[]');
+                    return { success: true, data: tags };
+                }
+                
+                if (sql.includes('INSERT') && sql.includes('users')) {
+                    const users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
+                    const newUser = {
+                        id: 'user-' + Date.now(),
+                        username: params[0],
+                        password: params[1],
+                        role: params[2],
+                        name: params[3]
+                    };
+                    users.push(newUser);
+                    localStorage.setItem('tdems_users', JSON.stringify(users));
+                    return { success: true, insertId: newUser.id };
+                }
+                
+                if (sql.includes('INSERT') && sql.includes('expenses')) {
+                    const expenses = JSON.parse(localStorage.getItem('tdems_expenses') || '[]');
+                    const newExpense = {
+                        id: 'exp-' + Date.now(),
+                        title: params[0],
+                        amount: parseFloat(params[1]),
+                        description: params[2],
+                        tags: JSON.parse(params[3] || '[]'),
+                        driverId: params[4],
+                        driverName: params[5],
+                        driverUsername: params[6],
+                        date: params[7],
+                        file: params[8] ? JSON.parse(params[8]) : null
+                    };
+                    expenses.push(newExpense);
+                    localStorage.setItem('tdems_expenses', JSON.stringify(expenses));
+                    return { success: true, insertId: newExpense.id };
+                }
+                
+                if (sql.includes('INSERT') && sql.includes('tags')) {
+                    const tags = JSON.parse(localStorage.getItem('tdems_tags') || '[]');
+                    const newTag = {
+                        id: 'tag-' + Date.now(),
+                        name: params[0],
+                        color: params[1]
+                    };
+                    tags.push(newTag);
+                    localStorage.setItem('tdems_tags', JSON.stringify(tags));
+                    return { success: true, insertId: newTag.id };
+                }
+                
+                if (sql.includes('UPDATE')) {
+                    return { success: true, affectedRows: 1 };
+                }
+                
+                if (sql.includes('DELETE')) {
+                    return { success: true, affectedRows: 1 };
+                }
+                
+                return { success: false, error: 'Query not simulated' };
+            }
+        };
 
         // Initialize app
         function init() {
-            initializeData();
-            checkAuth();
-        }
-
-        // Initialize data
-        function initializeData() {
-            var users = localStorage.getItem('tdems_users');
-            if (!users) {
+            console.log('Initializing app...');
+            
+            // Initialize default data if not exists
+            if (!localStorage.getItem('tdems_users')) {
                 var defaultAdmin = {
                     id: 'admin-001',
                     username: 'admin',
@@ -87,6 +391,20 @@
                 };
                 localStorage.setItem('tdems_users', JSON.stringify([defaultAdmin]));
             }
+            
+            if (!localStorage.getItem('tdems_tags')) {
+                var defaultTags = [
+                    { id: 'fuel', name: 'Fuel', color: '#dc3545' },
+                    { id: 'maintenance', name: 'Maintenance', color: '#fd7e14' },
+                    { id: 'food', name: 'Food', color: '#28a745' },
+                    { id: 'lodging', name: 'Lodging', color: '#17a2b8' },
+                    { id: 'tolls', name: 'Tolls', color: '#6f42c1' },
+                    { id: 'insurance', name: 'Insurance', color: '#e83e8c' }
+                ];
+                localStorage.setItem('tdems_tags', JSON.stringify(defaultTags));
+            }
+            
+            checkAuth();
         }
 
         // Check authentication
@@ -100,84 +418,38 @@
             }
         }
 
-        // Show login screen
+        // Show login screen - FIXED VERSION
         function showLogin() {
             var app = document.getElementById('app');
             app.innerHTML = 
-                '<div class="login-container">' +
-                    '<div class="login-card">' +
-                        '<div class="logo"><i class="fas fa-truck"></i></div>' +
-                        '<h2>Expense Tracker</h2>' +
-                        '<p>Truck Driver Management</p>' +
-                        '<form onsubmit="handleLogin(event)">' +
-                            '<div class="form-group">' +
-                                '<label>Username</label>' +
-                                '<input type="text" id="username" placeholder="Enter username" required>' +
+                '<div class="flex items-center justify-center min-h-[80vh]">' +
+                    '<div class="login-card text-center">' +
+                        '<div class="text-6xl text-primary mb-6 pulse-animation">' +
+                            '<i class="fas fa-truck"></i>' +
+                        '</div>' +
+                        '<h2 class="text-4xl font-black text-black mb-2">Expense Tracker</h2>' +
+                        '<p class="text-gray-500 mb-10">Truck Driver Management</p>' +
+                        '<div>' +
+                            '<div class="mb-6 text-left">' +
+                                '<label class="block text-sm font-semibold text-black mb-2 uppercase tracking-wide">Username</label>' +
+                                '<input type="text" id="username" placeholder="Enter username" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-black">' +
                             '</div>' +
-                            '<div class="form-group">' +
-                                '<label>Password</label>' +
-                                '<input type="password" id="password" placeholder="Enter password" required>' +
+                            '<div class="mb-8 text-left">' +
+                                '<label class="block text-sm font-semibold text-black mb-2 uppercase tracking-wide">Password</label>' +
+                                '<input type="password" id="password" placeholder="Enter password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-black">' +
                             '</div>' +
-                            '<div id="loginError" class="error hidden"></div>' +
-                            '<button type="submit" class="btn">Sign In</button>' +
-                        '</form>' +
-                        '<div style="margin-top: 20px; font-size: 14px; color: #666;">Default: admin / admin123</div>' +
+                            '<div id="loginError" class="hidden bg-red-500 text-white p-4 rounded-2xl mb-6 shake-animation"></div>' +
+                            '<button onclick="handleLogin()" class="btn-primary w-full justify-center text-lg">' +
+                                '<i class="fas fa-sign-in-alt mr-2"></i>Sign In' +
+                            '</button>' +
+                        '</div>' +
+                        '<div class="mt-8 text-sm text-gray-400">Default: admin / admin123</div>' +
                     '</div>' +
                 '</div>';
         }
 
-        // Show dashboard
-        function showDashboard() {
-            loadExpenses();
-            var app = document.getElementById('app');
-            app.innerHTML = 
-                '<div class="container">' +
-                    '<div class="dashboard">' +
-                        '<div class="header">' +
-                            '<h1>Expense Management System</h1>' +
-                            '<div>' +
-                                '<div class="user-info">Welcome, ' + currentUser.name + ' (' + currentUser.role + ')</div>' +
-                                '<button class="logout-btn" onclick="logout()">Logout</button>' +
-                            '</div>' +
-                        '</div>' +
-                        '<div class="total-display" id="totalDisplay">Total Expenses: $0.00</div>' +
-                        '<div class="search-bar">' +
-                            '<input type="text" id="searchInput" class="search-input" placeholder="Search expenses..." oninput="renderExpenses()">' +
-                            (currentUser.role === 'driver' ? '<button class="add-expense-btn" onclick="showExpenseForm()"><i class="fas fa-plus" style="margin-right: 8px;"></i>Add Expense</button>' : '') +
-                        '</div>' +
-                        '<div class="tag-buttons" id="filterTags"></div>' +
-                        '<div id="expenseForm" class="expense-form hidden">' +
-                            '<h3>Add New Expense</h3>' +
-                            '<div class="form-row">' +
-                                '<div class="form-group">' +
-                                    '<label>Title</label>' +
-                                    '<input type="text" id="expenseTitle" placeholder="Expense Title">' +
-                                '</div>' +
-                                '<div class="form-group">' +
-                                    '<label>Amount</label>' +
-                                    '<input type="number" id="expenseAmount" placeholder="Amount">' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="form-row-full">' +
-                                '<label>Description</label>' +
-                                '<textarea id="expenseDescription" placeholder="Description"></textarea>' +
-                            '</div>' +
-                            '<div class="flex">' +
-                                '<button class="btn" style="background: #28a745;" onclick="saveExpense()">Save Expense</button>' +
-                                '<button class="btn" style="background: #6c757d;" onclick="hideExpenseForm()">Cancel</button>' +
-                            '</div>' +
-                        '</div>' +
-                        '<div class="expense-grid" id="expensesGrid"></div>' +
-                    '</div>' +
-                '</div>';
-            
-            renderTags();
-            renderExpenses();
-        }
-
-        // Handle login
-        function handleLogin(event) {
-            event.preventDefault();
+        // Handle login - FIXED VERSION
+        function handleLogin() {
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
             var errorDiv = document.getElementById('loginError');
@@ -202,158 +474,437 @@
             showLogin();
         }
 
-        // Load expenses
-        function loadExpenses() {
-            var stored = localStorage.getItem('tdems_expenses');
-            if (stored) {
-                expenses = JSON.parse(stored);
+        // Load data
+        async function loadData() {
+            let u = await db.executeQuery('SELECT * FROM users'); 
+            if(u.success) users = u.data;
+            let e = await db.executeQuery('SELECT * FROM expenses'); 
+            if(e.success) expenses = e.data;
+            let t = await db.executeQuery('SELECT * FROM tags'); 
+            if(t.success) tags = t.data;
+        }
+
+        // Show dashboard
+        async function showDashboard() {
+            await loadData();
+            let app = document.getElementById('app');
+            let isAdmin = currentUser?.role === 'admin';
+            
+            app.innerHTML = `
+                <div class="dashboard-card">
+                    <!-- header -->
+                    <div class="flex justify-between items-center px-10 py-6 border-b border-gray-200 bg-white/90">
+                        <h1 class="text-3xl font-black text-black tracking-tight">💰 Expense Management</h1>
+                        <div class="flex items-center gap-6">
+                            <span class="text-gray-600 font-medium">${currentUser.name} (${currentUser.role})</span>
+                            ${isAdmin ? '<button class="btn-secondary text-sm py-2 px-5" onclick="exportToPDF()"><i class="fas fa-file-pdf mr-2"></i>Export PDF</button>' : ''}
+                            <button class="btn-danger text-sm py-2 px-5" onclick="logout()">Logout</button>
+                        </div>
+                    </div>
+                    ${isAdmin ? `
+                    <!-- tabs -->
+                    <div class="flex gap-1 px-10 pt-4 bg-gray-50/80">
+                        <div class="tab-btn active" onclick="showTab('expenses')">Expenses</div>
+                        <div class="tab-btn" onclick="showTab('users')">User Management</div>
+                        <div class="tab-btn" onclick="showTab('tags')">Tag Management</div>
+                    </div>
+                    ` : ''}
+                    <!-- content area -->
+                    <div class="p-10 bg-white/95">
+                        <!-- total + search bar -->
+                        <div class="total-badge" id="totalDisplay">Total: $0.00</div>
+                        <div class="flex flex-wrap items-center gap-4 mb-8">
+                            <input type="text" id="searchInput" placeholder="Search expenses, driver..." class="flex-1 min-w-[240px]" oninput="renderExpenses()">
+                            <button class="btn-primary" onclick="showExpenseForm()"><i class="fas fa-plus"></i> Add Expense</button>
+                        </div>
+                        <!-- filter tags -->
+                        <div class="flex flex-wrap gap-3 mb-10" id="filterTags"></div>
+
+                        <!-- dynamic tab contents -->
+                        <div id="expensesTab" class="tab-content block">
+                            <div id="expenseForm" class="hidden bg-gray-50 p-8 rounded-3xl border border-gray-200 mb-10">
+                                <h3 class="text-2xl font-bold text-black mb-6">➕ Add Expense</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div><label>Title *</label><input type="text" id="expenseTitle" placeholder="e.g. Fuel"></div>
+                                    <div><label>Amount ($) *</label><input type="number" id="expenseAmount" placeholder="0.00"></div>
+                                    ${isAdmin ? `<div><label>Driver</label><select id="expenseDriver"><option value="">Select driver</option></select></div>` : ''}
+                                    <div><label>Tags (multi)</label><select id="expenseTags" multiple class="h-32"></select></div>
+                                </div>
+                                <div class="mt-6"><label>Description</label><textarea id="expenseDescription" rows="3"></textarea></div>
+                                <div class="mt-6">
+                                    <label>Receipt / file</label>
+                                    <div class="file-drop" id="fileUpload" onclick="document.getElementById('expenseFile').click()">
+                                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                                        <p class="text-gray-500">Click or drag to upload</p>
+                                        <div class="text-sm text-gray-400 mt-2" id="fileInfo"></div>
+                                    </div>
+                                    <input type="file" id="expenseFile" class="hidden" onchange="handleFileSelect(event)">
+                                    <input type="text" id="documentName" placeholder="Document name (optional)" class="mt-4">
+                                </div>
+                                <div class="flex gap-4 mt-8">
+                                    <button class="btn-primary" onclick="saveExpense()">Save Expense</button>
+                                    <button class="btn-secondary" onclick="hideExpenseForm()">Cancel</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="expensesGrid"></div>
+                        </div>
+
+                        <div id="usersTab" class="tab-content hidden">
+                            <div class="bg-gray-50 p-8 rounded-3xl border border-gray-200 mb-10">
+                                <h3 class="text-2xl font-bold mb-6">👤 Add User</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div><label>Username</label><input type="text" id="newUsername"></div>
+                                    <div><label>Password</label><input type="password" id="newPassword"></div>
+                                    <div><label>Full Name</label><input type="text" id="newFullName"></div>
+                                    <div><label>Role</label><select id="newRole"><option value="driver">Driver</option><option value="admin">Admin</option></select></div>
+                                </div>
+                                <button class="btn-primary mt-8" onclick="addUser()"><i class="fas fa-user-plus"></i> Add User</button>
+                            </div>
+                            <div id="editUserForm" class="hidden bg-blue-50 p-8 rounded-3xl border border-blue-200 mb-10">
+                                <h3 class="text-2xl font-bold mb-6">✏️ Edit User</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div><label>Username</label><input type="text" id="editUsername"></div>
+                                    <div><label>Password (blank = keep)</label><input type="password" id="editPassword"></div>
+                                    <div><label>Full Name</label><input type="text" id="editFullName"></div>
+                                    <div><label>Role</label><select id="editRole"><option value="driver">Driver</option><option value="admin">Admin</option></select></div>
+                                </div>
+                                <div class="flex gap-4 mt-8">
+                                    <button class="btn-primary" onclick="updateUser()">Update</button>
+                                    <button class="btn-secondary" onclick="cancelEditUser()">Cancel</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="usersGrid"></div>
+                        </div>
+
+                        <div id="tagsTab" class="tab-content hidden">
+                            <div class="bg-gray-50 p-8 rounded-3xl border border-gray-200 mb-10">
+                                <h3 class="text-2xl font-bold mb-6">🏷️ Add Tag</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div><label>Tag Name</label><input type="text" id="newTagName"></div>
+                                    <div><label>Color</label><div class="flex flex-wrap gap-3" id="colorPicker"></div></div>
+                                </div>
+                                <button class="btn-primary mt-8" onclick="addTag()"><i class="fas fa-tag"></i> Add Tag</button>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="tagsGrid"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (isAdmin) { 
+                renderColorPicker(); 
+                renderUsers(); 
+                renderTagsGrid(); 
+            }
+            renderTags();
+            renderExpenses();
+            populateTagsDropdown();
+            
+            // Populate driver dropdown for admin
+            if (isAdmin) {
+                let sel = document.getElementById('expenseDriver');
+                if (sel) {
+                    sel.innerHTML = '<option value="">Select driver</option>';
+                    users.filter(u => u.role === 'driver').forEach(d => {
+                        sel.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+                    });
+                }
             }
         }
 
-        // Show expense form
+        function showTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tab+'Tab').classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function renderTags() {
+            let container = document.getElementById('filterTags');
+            if (!container) return;
+            container.innerHTML = '';
+            tags.forEach(t => {
+                let btn = document.createElement('button');
+                btn.className = `filter-tag ${selectedFilterTags.includes(t.id) ? 'active' : ''}`;
+                btn.style.backgroundColor = selectedFilterTags.includes(t.id) ? t.color : '';
+                btn.style.borderColor = selectedFilterTags.includes(t.id) ? t.color : '#e2e8f0';
+                btn.textContent = t.name;
+                btn.onclick = () => toggleFilterTag(t.id);
+                container.appendChild(btn);
+            });
+        }
+
+        function toggleFilterTag(id) {
+            let idx = selectedFilterTags.indexOf(id);
+            idx === -1 ? selectedFilterTags.push(id) : selectedFilterTags.splice(idx,1);
+            renderTags();
+            renderExpenses();
+        }
+
         function showExpenseForm() {
             document.getElementById('expenseForm').classList.remove('hidden');
-            document.getElementById('expenseTitle').value = '';
-            document.getElementById('expenseAmount').value = '';
-            document.getElementById('expenseDescription').value = '';
+            populateTagsDropdown();
         }
 
-        // Hide expense form
-        function hideExpenseForm() {
-            document.getElementById('expenseForm').classList.add('hidden');
+        function hideExpenseForm() { 
+            document.getElementById('expenseForm').classList.add('hidden'); 
+            uploadedFile = null; 
+            document.getElementById('fileInfo').innerHTML = '';
         }
 
-        // Save expense
-        function saveExpense() {
-            var title = document.getElementById('expenseTitle').value;
-            var amount = document.getElementById('expenseAmount').value;
-            var description = document.getElementById('expenseDescription').value;
-
-            if (!title || !amount) {
-                alert('Please fill required fields');
-                return;
-            }
-
-            var expense = {
-                id: 'exp-' + Date.now(),
-                title: title,
-                amount: parseFloat(amount),
-                description: description,
-                tags: [],
-                driverId: currentUser.id,
-                driverName: currentUser.name,
-                driverUsername: currentUser.username,
-                date: new Date().toISOString().split('T')[0]
-            };
-
-            expenses.push(expense);
-            localStorage.setItem('tdems_expenses', JSON.stringify(expenses));
-
-            hideExpenseForm();
-            renderExpenses();
+        function populateTagsDropdown() {
+            let sel = document.getElementById('expenseTags');
+            if (!sel) return;
+            sel.innerHTML = '';
+            tags.forEach(t => sel.innerHTML += `<option value="${t.id}">${t.name}</option>`);
         }
 
-        // Delete expense
-        function deleteExpense(expenseId) {
-            if (confirm('Delete this expense?')) {
-                expenses = expenses.filter(function(e) { return e.id !== expenseId; });
-                localStorage.setItem('tdems_expenses', JSON.stringify(expenses));
-                renderExpenses();
-            }
+        function handleFileSelect(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            uploadedFile = file;
+            document.getElementById('fileInfo').innerHTML = `<span class="text-green-600">${file.name} (${(file.size/1024).toFixed(1)} KB)</span>`;
         }
 
-        // Format currency
-        function formatCurrency(amount) {
-            return '$' + amount.toFixed(2);
+        function fileToBase64(file, cb) { 
+            let r = new FileReader(); 
+            r.onload = () => cb(r.result); 
+            r.readAsDataURL(file); 
         }
 
-        // Render tags
-        function renderTags() {
-            var container = document.getElementById('filterTags');
-            if (!container) return;
+        async function saveExpense() {
+            let title = document.getElementById('expenseTitle').value;
+            let amount = parseFloat(document.getElementById('expenseAmount').value);
+            let desc = document.getElementById('expenseDescription').value;
+            let docName = document.getElementById('documentName').value;
             
-            container.innerHTML = '';
-            for (var i = 0; i < tags.length; i++) {
-                var tag = tags[i];
-                var button = document.createElement('button');
-                button.className = 'tag-btn';
-                button.textContent = tag.name;
-                button.onclick = (function(tagId) {
-                    return function() {
-                        toggleTag(tagId);
-                    };
-                })(tag.id);
-                container.appendChild(button);
-            }
-        }
-
-        // Toggle tag
-        function toggleTag(tagId) {
-            console.log('Tag clicked:', tagId);
-            renderExpenses();
-        }
-
-        // Render expenses
-        function renderExpenses() {
-            var container = document.getElementById('expensesGrid');
-            if (!container) return;
-
-            var searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            var filteredExpenses = expenses.filter(function(expense) {
-                var matchesSearch = 
-                    expense.title.toLowerCase().indexOf(searchTerm) !== -1 ||
-                    expense.description.toLowerCase().indexOf(searchTerm) !== -1 ||
-                    expense.driverName.toLowerCase().indexOf(searchTerm) !== -1;
-
-                if (currentUser.role === 'driver') {
-                    return matchesSearch && expense.driverId === currentUser.id;
+            if (!title || !amount) return alert('Title & amount required');
+            
+            let tagSelect = document.getElementById('expenseTags');
+            let selected = Array.from(tagSelect.selectedOptions).map(o => o.value);
+            
+            let driverId = currentUser.id, driverName = currentUser.name, driverUsername = currentUser.username;
+            
+            if (currentUser.role === 'admin') {
+                let dSel = document.getElementById('expenseDriver');
+                if (dSel && dSel.value) {
+                    let d = users.find(u => u.id === dSel.value);
+                    if (d) { driverId = d.id; driverName = d.name; driverUsername = d.username; }
                 }
-
-                return matchesSearch;
-            });
-
-            // Update total
-            var total = filteredExpenses.reduce(function(sum, exp) { return sum + exp.amount; }, 0);
-            var totalDisplay = document.getElementById('totalDisplay');
-            if (totalDisplay) {
-                totalDisplay.textContent = 'Total Expenses: ' + formatCurrency(total);
             }
+            
+            let expense = { 
+                id: 'exp-'+Date.now(), 
+                title, 
+                amount, 
+                description: desc, 
+                tags: selected, 
+                driverId, 
+                driverName, 
+                driverUsername, 
+                date: new Date().toISOString().slice(0,10) 
+            };
+            
+            if (uploadedFile) {
+                fileToBase64(uploadedFile, async (b64) => {
+                    expense.file = { 
+                        name: uploadedFile.name, 
+                        displayName: docName || uploadedFile.name, 
+                        type: uploadedFile.type, 
+                        data: b64 
+                    };
+                    await finalSave(expense);
+                });
+            } else await finalSave(expense);
+        }
 
-            // Clear container
-            container.innerHTML = '';
-
-            // Render expense cards
-            for (var i = 0; i < filteredExpenses.length; i++) {
-                var expense = filteredExpenses[i];
-                var card = document.createElement('div');
-                card.className = 'expense-card';
-
-                var canDelete = currentUser.role === 'admin' || expense.driverId === currentUser.id;
-
-                card.innerHTML = 
-                    '<div class="expense-header">' +
-                        '<h3 class="expense-title">' + expense.title + '</h3>' +
-                        '<div class="expense-amount">' + formatCurrency(expense.amount) + '</div>' +
-                    '</div>' +
-                    '<p class="expense-description">' + expense.description + '</p>' +
-                    '<div class="expense-meta">' +
-                        'Driver: ' + expense.driverName + '<br>' +
-                        'Date: ' + new Date(expense.date).toLocaleDateString() +
-                    '</div>' +
-                    '<div class="expense-actions">' +
-                        (canDelete ? '<button class="action-btn delete-btn" onclick="deleteExpense(\'' + expense.id + '\')">Delete</button>' : '') +
-                    '</div>';
-
-                container.appendChild(card);
+        async function finalSave(exp) {
+            let r = await db.executeQuery('INSERT INTO expenses (title, amount, description, tags, driverId, driverName, driverUsername, date, file) VALUES (?,?,?,?,?,?,?,?,?)',
+                [exp.title, exp.amount, exp.description, JSON.stringify(exp.tags), exp.driverId, exp.driverName, exp.driverUsername, exp.date, exp.file ? JSON.stringify(exp.file) : null]);
+            if (r.success) { 
+                expenses.push(exp); 
+                hideExpenseForm(); 
+                renderExpenses(); 
             }
         }
+
+        function deleteExpense(id) { 
+            if(confirm('Delete expense?')) { 
+                expenses = expenses.filter(e => e.id !== id); 
+                localStorage.setItem('tdems_expenses', JSON.stringify(expenses)); 
+                renderExpenses(); 
+            } 
+        }
+
+        function renderExpenses() {
+            let grid = document.getElementById('expensesGrid');
+            if (!grid) return;
+            
+            let search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            let filtered = expenses.filter(e => 
+                (e.title.toLowerCase().includes(search) || 
+                 e.description.toLowerCase().includes(search) || 
+                 e.driverName.toLowerCase().includes(search)) && 
+                (currentUser.role === 'admin' || e.driverId === currentUser.id)
+            );
+            
+            if (selectedFilterTags.length) {
+                filtered = filtered.filter(e => e.tags?.some(t => selectedFilterTags.includes(t)));
+            }
+            
+            let total = filtered.reduce((s,e) => s + e.amount, 0);
+            let totalEl = document.getElementById('totalDisplay');
+            if (totalEl) totalEl.innerText = `Total: $${total.toFixed(2)}`;
+            
+            if (!filtered.length) { 
+                grid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-400 text-lg">No expenses yet</div>'; 
+                return; 
+            }
+            
+            grid.innerHTML = filtered.map(e => {
+                let tagChips = (e.tags || []).map(tid => { 
+                    let t = tags.find(tt => tt.id === tid); 
+                    return t ? `<span class="tag-chip" style="background:${t.color}20; color:${t.color}; border:1px solid ${t.color}40">${t.name}</span>` : ''; 
+                }).join(' ');
+                
+                let fileHtml = e.file ? `<div class="flex items-center gap-3 mt-4"><i class="fas fa-paperclip text-cyan-600"></i><span class="text-sm">${e.file.displayName || e.file.name}</span><button class="bg-cyan-500 text-white px-4 py-1 rounded-full text-xs" onclick='viewFile("${e.file.data}","${e.file.name}","${e.file.type}")'>View</button></div>` : '';
+                
+                return `<div class="expense-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-black">${e.title}</h3>
+                        <span class="text-2xl font-extrabold text-green-600">$${e.amount.toFixed(2)}</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">${e.description}</p>
+                    <div class="flex flex-wrap gap-2 mb-4">${tagChips}</div>
+                    ${fileHtml}
+                    <div class="text-sm text-gray-400 mb-5">${e.driverName} · ${new Date(e.date).toLocaleDateString()}</div>
+                    <div><button class="btn-danger text-sm py-2 px-5" onclick="deleteExpense('${e.id}')">Delete</button></div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderUsers() {
+            let g = document.getElementById('usersGrid'); 
+            if(!g) return;
+            g.innerHTML = users.map(u => `<div class="grid-card">
+                <h4 class="font-bold text-lg">${u.name}</h4>
+                <p class="text-sm text-gray-500">@${u.username} · ${u.role}</p>
+                <div class="flex gap-3 mt-5">
+                    <button class="bg-blue-500 text-white px-5 py-2 rounded-full text-sm" onclick="editUser('${u.id}')">Edit</button>
+                    ${u.username !== 'admin' ? `<button class="bg-red-500 text-white px-5 py-2 rounded-full text-sm" onclick="deleteUser('${u.id}')">Delete</button>` : ''}
+                </div>
+            </div>`).join('');
+        }
+
+        function deleteUser(id) { 
+            if(confirm('Delete user?')) { 
+                users = users.filter(u => u.id !== id); 
+                localStorage.setItem('tdems_users', JSON.stringify(users)); 
+                renderUsers(); 
+            } 
+        }
+
+        function editUser(id) { 
+            let u = users.find(x => x.id === id); 
+            if(!u) return; 
+            editingUserId = id; 
+            document.getElementById('editUsername').value = u.username; 
+            document.getElementById('editFullName').value = u.name; 
+            document.getElementById('editRole').value = u.role; 
+            document.getElementById('editUserForm').classList.remove('hidden'); 
+        }
+        
+        function cancelEditUser() { 
+            document.getElementById('editUserForm').classList.add('hidden'); 
+            editingUserId = null; 
+        }
+        
+        function updateUser() { 
+            let u = users.find(x => x.id === editingUserId); 
+            if(!u) return; 
+            u.username = document.getElementById('editUsername').value; 
+            u.name = document.getElementById('editFullName').value; 
+            u.role = document.getElementById('editRole').value; 
+            let pw = document.getElementById('editPassword').value; 
+            if(pw) u.password = pw; 
+            localStorage.setItem('tdems_users', JSON.stringify(users)); 
+            cancelEditUser(); 
+            renderUsers(); 
+        }
+
+        async function addUser() {
+            let username = document.getElementById('newUsername').value;
+            let pw = document.getElementById('newPassword').value;
+            let name = document.getElementById('newFullName').value;
+            let role = document.getElementById('newRole').value;
+            
+            if (!username || !pw || !name) return alert('All fields required');
+            
+            let r = await db.executeQuery('INSERT INTO users (username, password, role, name) VALUES (?,?,?,?)', [username, pw, role, name]);
+            if (r.success) { 
+                users.push({ id: r.insertId, username, password: pw, role, name }); 
+                renderUsers(); 
+                document.getElementById('newUsername').value = ''; 
+                document.getElementById('newPassword').value = ''; 
+                document.getElementById('newFullName').value = ''; 
+            }
+        }
+
+        function renderTagsGrid() {
+            let g = document.getElementById('tagsGrid'); 
+            if(!g) return;
+            g.innerHTML = tags.map(t => `<div class="grid-card flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 rounded-full" style="background:${t.color}"></span>
+                    <span class="font-medium">${t.name}</span>
+                </div>
+                <button class="text-red-500 hover:text-red-700" onclick="deleteTag('${t.id}')"><i class="fas fa-trash"></i></button>
+            </div>`).join('');
+        }
+
+        function renderColorPicker() {
+            let picker = document.getElementById('colorPicker'); 
+            if(!picker) return;
+            picker.innerHTML = availableColors.map(c => 
+                `<div class="w-10 h-10 rounded-full cursor-pointer border-4 ${c === selectedTagColor ? 'border-primary scale-110' : 'border-transparent'}" 
+                      style="background:${c}" onclick="selectedTagColor='${c}'; renderColorPicker()"></div>`
+            ).join('');
+        }
+
+        function addTag() {
+            let name = document.getElementById('newTagName').value;
+            if (!name) return alert('enter tag name');
+            if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) return alert('exists');
+            let newTag = { id: 'tag-'+Date.now(), name, color: selectedTagColor };
+            tags.push(newTag); 
+            localStorage.setItem('tdems_tags', JSON.stringify(tags)); 
+            renderTagsGrid(); 
+            renderTags(); 
+            document.getElementById('newTagName').value = '';
+        }
+
+        function deleteTag(id) { 
+            if(confirm('Delete tag?')) { 
+                tags = tags.filter(t => t.id !== id); 
+                localStorage.setItem('tdems_tags', JSON.stringify(tags)); 
+                renderTagsGrid(); 
+                renderTags(); 
+            } 
+        }
+
+        function exportToPDF() { alert('PDF export ready (mock)'); }
+        function viewFile(data, name, type) { window.open(data); }
 
         // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            try {
+                init();
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="bg-white rounded-2xl shadow-2xl p-8 text-center"><div class="text-red-500 text-xl font-bold mb-4">Error initializing app</div><div class="text-gray-600">' + error.message + '</div><button onclick="location.reload()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg btn-hover">Refresh Page</button></div></div>';
+            }
+        });
     </script>
 </body>
 </html>
