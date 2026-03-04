@@ -8,677 +8,480 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .login-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .login-card {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            width: 400px;
-            text-align: center;
-        }
-        .logo {
-            font-size: 48px;
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .error {
-            background: #fee;
-            color: #c53030;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #fecaca;
-        }
-        .dashboard {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .header h1 {
-            color: #333;
-            margin: 0;
-        }
-        .header .user-info {
-            color: #666;
-            font-size: 14px;
-        }
-        .logout-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .expense-form {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .form-row-full {
-            margin-bottom: 20px;
-        }
-        .form-row-full input,
-        .form-row-full textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        .form-row-full textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        .tag-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .tag-btn {
-            padding: 8px 16px;
-            border: 2px solid #e1e5e9;
-            background: white;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .tag-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-        .expense-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .expense-card {
-            background: white;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            padding: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .expense-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-        .expense-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
-        }
-        .expense-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-        }
-        .expense-amount {
-            font-size: 20px;
-            font-weight: bold;
-            color: #28a745;
-        }
-        .expense-description {
-            color: #666;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        .expense-meta {
-            font-size: 14px;
-            color: #999;
-            margin-bottom: 15px;
-        }
-        .expense-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .expense-tag {
-            background: #e9ecef;
-            color: #495057;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-        .expense-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .action-btn {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .view-btn {
-            background: #007bff;
-            color: white;
-        }
-        .delete-btn {
-            background: #dc3545;
-            color: white;
-        }
-        .search-bar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            align-items: center;
-        }
-        .search-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        .add-expense-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .total-display {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 30px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .login-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 400px; text-align: center; }
+        .logo { font-size: 48px; color: #667eea; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        .form-group input { width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .btn:hover { opacity: 0.9; }
+        .error { background: #fee; color: #c53030; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; }
+        .dashboard { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
+        .header h1 { color: #333; margin: 0; }
+        .header .user-info { color: #666; font-size: 14px; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .expense-form { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-row-full { margin-bottom: 20px; }
+        .form-row-full input, .form-row-full textarea { width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; }
+        .form-row-full textarea { min-height: 100px; }
+        .tag-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .tag-btn { padding: 8px 16px; border: 2px solid #e1e5e9; background: white; border-radius: 20px; cursor: pointer; }
+        .tag-btn.active { background: #667eea; color: white; border-color: #667eea; }
+        .expense-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .expense-card { background: white; border: 2px solid #e1e5e9; border-radius: 12px; padding: 20px; }
+        .expense-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; }
+        .expense-title { font-size: 18px; font-weight: 600; color: #333; margin: 0; }
+        .expense-amount { font-size: 20px; font-weight: bold; color: #28a745; }
+        .expense-description { color: #666; margin-bottom: 15px; }
+        .expense-meta { font-size: 14px; color: #999; margin-bottom: 15px; }
+        .expense-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .expense-tag { background: #e9ecef; color: #495057; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+        .expense-actions { display: flex; gap: 10px; }
+        .action-btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .delete-btn { background: #dc3545; color: white; }
+        .search-bar { display: flex; gap: 15px; margin-bottom: 30px; align-items: center; }
+        .search-input { flex: 1; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; }
+        .add-expense-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .total-display { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 30px; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script>
-        const { useState, useEffect, createContext, useContext } = React;
+        window.addEventListener('DOMContentLoaded', function() {
+            const { useState, useEffect, createContext, useContext } = React;
 
-        const STORAGE_KEYS = {
-            USERS: 'tdems_users',
-            EXPENSES: 'tdems_expenses',
-            TAGS: 'tdems_tags',
-            CURRENT_USER: 'tdems_current_user'
-        };
+            const STORAGE_KEYS = {
+                USERS: 'tdems_users',
+                EXPENSES: 'tdems_expenses',
+                TAGS: 'tdems_tags',
+                CURRENT_USER: 'tdems_current_user'
+            };
 
-        const DEFAULT_TAGS = [
-            { id: 'fuel', name: 'Fuel', color: '#dc3545' },
-            { id: 'maintenance', name: 'Maintenance', color: '#fd7e14' },
-            { id: 'food', name: 'Food', color: '#28a745' },
-            { id: 'lodging', name: 'Lodging', color: '#17a2b8' },
-            { id: 'tolls', name: 'Tolls', color: '#6f42c1' },
-            { id: 'insurance', name: 'Insurance', color: '#e83e8c' },
-            { id: 'supplies', name: 'Supplies', color: '#6610f2' },
-            { id: 'other', name: 'Other', color: '#6c757d' }
-        ];
+            const DEFAULT_TAGS = [
+                { id: 'fuel', name: 'Fuel', color: '#dc3545' },
+                { id: 'maintenance', name: 'Maintenance', color: '#fd7e14' },
+                { id: 'food', name: 'Food', color: '#28a745' },
+                { id: 'lodging', name: 'Lodging', color: '#17a2b8' },
+                { id: 'tolls', name: 'Tolls', color: '#6f42c1' },
+                { id: 'insurance', name: 'Insurance', color: '#e83e8c' },
+                { id: 'supplies', name: 'Supplies', color: '#6610f2' },
+                { id: 'other', name: 'Other', color: '#6c757d' }
+            ];
 
-        const initializeData = () => {
-            const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-            if (users.length === 0) {
-                const defaultAdmin = {
-                    id: 'admin-001',
-                    username: 'admin',
-                    password: 'admin123',
-                    role: 'admin',
-                    name: 'Fleet Manager',
-                    createdAt: new Date().toISOString()
-                };
-                localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify([defaultAdmin]));
-            }
-            const tags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
-            if (tags.length === 0) {
-                localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(DEFAULT_TAGS));
-            }
-        };
-
-        const formatCurrency = (amount) => {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            }).format(amount);
-        };
-
-        const AuthContext = createContext();
-
-        const Login = () => {
-            const [username, setUsername] = useState('');
-            const [password, setPassword] = useState('');
-            const [error, setError] = useState('');
-            const [loading, setLoading] = useState(false);
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                setLoading(true);
-                setError('');
-                
-                const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-                const user = users.find(u => u.username === username && u.password === password);
-                
-                if (user) {
-                    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
-                    window.location.reload();
-                } else {
-                    setError('Invalid username or password');
+            const initializeData = function() {
+                try {
+                    var users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                    if (users.length === 0) {
+                        var defaultAdmin = {
+                            id: 'admin-001',
+                            username: 'admin',
+                            password: 'admin123',
+                            role: 'admin',
+                            name: 'Fleet Manager',
+                            createdAt: new Date().toISOString()
+                        };
+                        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify([defaultAdmin]));
+                    }
+                    var tags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+                    if (tags.length === 0) {
+                        localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(DEFAULT_TAGS));
+                    }
+                } catch (e) {
+                    console.error('Error initializing data:', e);
                 }
-                setLoading(false);
             };
 
-            return React.createElement('div', { className: 'login-container' }, [
-                React.createElement('div', { className: 'login-card' }, [
-                    React.createElement('div', { className: 'logo' }, [
-                        React.createElement('i', { className: 'fas fa-truck' })
-                    ]),
-                    React.createElement('h2', null, 'Expense Tracker'),
-                    React.createElement('p', null, 'Truck Driver Management'),
+            const formatCurrency = function(amount) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(amount);
+            };
+
+            const AuthContext = createContext();
+
+            const Login = function() {
+                var usernameState = useState('');
+                var passwordState = useState('');
+                var errorState = useState('');
+                var loadingState = useState(false);
+
+                var setUsername = usernameState[1];
+                var setPassword = passwordState[1];
+                var setError = errorState[1];
+                var setLoading = loadingState[1];
+                var username = usernameState[0];
+                var password = passwordState[0];
+                var error = errorState[0];
+                var loading = loadingState[0];
+
+                var handleSubmit = function(e) {
+                    e.preventDefault();
+                    setLoading(true);
+                    setError('');
                     
-                    React.createElement('form', { onSubmit: handleSubmit }, [
-                        React.createElement('div', { className: 'form-group' }, [
-                            React.createElement('label', null, 'Username'),
-                            React.createElement('input', {
-                                type: 'text',
-                                value: username,
-                                onChange: (e) => setUsername(e.target.value),
-                                placeholder: 'Enter username',
-                                required: true
-                            })
-                        ]),
+                    try {
+                        var users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+                        var user = users.find(function(u) { return u.username === username && u.password === password; });
                         
-                        React.createElement('div', { className: 'form-group' }, [
-                            React.createElement('label', null, 'Password'),
-                            React.createElement('input', {
-                                type: 'password',
-                                value: password,
-                                onChange: (e) => setPassword(e.target.value),
-                                placeholder: 'Enter password',
-                                required: true
-                            })
-                        ]),
-                        
-                        error && React.createElement('div', { className: 'error' }, error),
-                        
-                        React.createElement('button', {
-                            type: 'submit',
-                            disabled: loading,
-                            className: 'btn'
-                        }, loading ? 'Signing in...' : 'Sign In')
-                    ]),
-                    
-                    React.createElement('div', { style: { marginTop: '20px', fontSize: '14px', color: '#666' } }, 'Default: admin / admin123')
-                ])
-            ]);
-        };
-
-        const Dashboard = () => {
-            const [expenses, setExpenses] = useState([]);
-            const [showAddExpense, setShowAddExpense] = useState(false);
-            const [searchTerm, setSearchTerm] = useState('');
-            const [selectedTags, setSelectedTags] = useState([]);
-            const [tags, setTags] = useState([]);
-            const [newExpense, setNewExpense] = useState({
-                title: '',
-                amount: '',
-                date: new Date().toISOString().split('T')[0],
-                description: '',
-                tags: []
-            });
-
-            const authContext = useContext(AuthContext);
-            const currentUser = authContext?.currentUser;
-
-            useEffect(() => {
-                loadExpenses();
-                loadTags();
-            }, []);
-
-            const loadExpenses = () => {
-                const allExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
-                setExpenses(allExpenses);
-            };
-
-            const loadTags = () => {
-                const allTags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
-                setTags(allTags);
-            };
-
-            const handleAddExpense = () => {
-                if (!newExpense.title || !newExpense.amount) {
-                    alert('Please fill required fields');
-                    return;
-                }
-
-                const expense = {
-                    id: 'exp-' + Date.now(),
-                    title: newExpense.title,
-                    amount: parseFloat(newExpense.amount),
-                    date: newExpense.date,
-                    description: newExpense.description,
-                    tags: newExpense.tags,
-                    driverId: currentUser.id,
-                    driverName: currentUser.name,
-                    driverUsername: currentUser.username,
-                    createdAt: new Date().toISOString()
+                        if (user) {
+                            localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+                            window.location.reload();
+                        } else {
+                            setError('Invalid username or password');
+                        }
+                    } catch (e) {
+                        setError('Login error occurred');
+                    }
+                    setLoading(false);
                 };
 
-                const allExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
-                allExpenses.push(expense);
-                localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(allExpenses));
-                loadExpenses();
-                
-                setNewExpense({
+                return React.createElement('div', { className: 'login-container' }, [
+                    React.createElement('div', { className: 'login-card' }, [
+                        React.createElement('div', { className: 'logo' }, [
+                            React.createElement('i', { className: 'fas fa-truck' })
+                        ]),
+                        React.createElement('h2', null, 'Expense Tracker'),
+                        React.createElement('p', null, 'Truck Driver Management'),
+                        
+                        React.createElement('form', { onSubmit: handleSubmit }, [
+                            React.createElement('div', { className: 'form-group' }, [
+                                React.createElement('label', null, 'Username'),
+                                React.createElement('input', {
+                                    type: 'text',
+                                    value: username,
+                                    onChange: function(e) { return setUsername(e.target.value); },
+                                    placeholder: 'Enter username',
+                                    required: true
+                                })
+                            ]),
+                            
+                            React.createElement('div', { className: 'form-group' }, [
+                                React.createElement('label', null, 'Password'),
+                                React.createElement('input', {
+                                    type: 'password',
+                                    value: password,
+                                    onChange: function(e) { return setPassword(e.target.value); },
+                                    placeholder: 'Enter password',
+                                    required: true
+                                })
+                            ]),
+                            
+                            error ? React.createElement('div', { className: 'error' }, error) : null,
+                            
+                            React.createElement('button', {
+                                type: 'submit',
+                                disabled: loading,
+                                className: 'btn'
+                            }, loading ? 'Signing in...' : 'Sign In')
+                        ]),
+                        
+                        React.createElement('div', { style: { marginTop: '20px', fontSize: '14px', color: '#666' } }, 'Default: admin / admin123')
+                    ])
+                ]);
+            };
+
+            const Dashboard = function() {
+                var expensesState = useState([]);
+                var showAddExpenseState = useState(false);
+                var searchTermState = useState('');
+                var selectedTagsState = useState([]);
+                var tagsState = useState([]);
+                var newExpenseState = useState({
                     title: '',
                     amount: '',
                     date: new Date().toISOString().split('T')[0],
                     description: '',
                     tags: []
                 });
-                setShowAddExpense(false);
-            };
 
-            const filteredExpenses = expenses.filter(expense => {
-                const matchesSearch = 
-                    expense.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    expense.driverName.toLowerCase().includes(searchTerm.toLowerCase());
-                
-                const matchesTags = selectedTags.length === 0 || 
-                    selectedTags.some(tagId => expense.tags.includes(tagId));
-                
-                if (currentUser.role === 'driver') {
-                    return matchesSearch && matchesTags && expense.driverId === currentUser.id;
-                }
-                
-                return matchesSearch && matchesTags;
-            });
+                var setExpenses = expensesState[1];
+                var setShowAddExpense = showAddExpenseState[1];
+                var setSearchTerm = searchTermState[1];
+                var setSelectedTags = selectedTagsState[1];
+                var setTags = tagsState[1];
+                var setNewExpense = newExpenseState[1];
+                var expenses = expensesState[0];
+                var showAddExpense = showAddExpenseState[0];
+                var searchTerm = searchTermState[0];
+                var selectedTags = selectedTagsState[0];
+                var tags = tagsState[0];
+                var newExpense = newExpenseState[0];
 
-            const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                var authContext = useContext(AuthContext);
+                var currentUser = authContext && authContext.currentUser;
 
-            const logout = () => {
-                localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
-                window.location.reload();
-            };
+                useEffect(function() {
+                    loadExpenses();
+                    loadTags();
+                }, []);
 
-            const isAdmin = currentUser?.role === 'admin';
+                var loadExpenses = function() {
+                    try {
+                        var allExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                        setExpenses(allExpenses);
+                    } catch (e) {
+                        console.error('Error loading expenses:', e);
+                    }
+                };
 
-            return React.createElement('div', { className: 'container' }, [
-                React.createElement('div', { className: 'header' }, [
-                    React.createElement('h1', null, 'Expense Management System'),
-                    React.createElement('div', null, [
-                        React.createElement('div', { className: 'user-info' }, 'Welcome, ' + currentUser.name + ' (' + currentUser.role + ')'),
-                        React.createElement('button', { onClick: logout, className: 'logout-btn' }, 'Logout')
-                    ])
-                ]),
+                var loadTags = function() {
+                    try {
+                        var allTags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+                        setTags(allTags);
+                    } catch (e) {
+                        console.error('Error loading tags:', e);
+                    }
+                };
 
-                React.createElement('div', { className: 'total-display' }, [
-                    'Total Expenses: ' + formatCurrency(totalExpenses)
-                ]),
+                var handleAddExpense = function() {
+                    if (!newExpense.title || !newExpense.amount) {
+                        alert('Please fill required fields');
+                        return;
+                    }
 
-                React.createElement('div', { className: 'search-bar' }, [
-                    React.createElement('input', {
-                        type: 'text',
-                        value: searchTerm,
-                        onChange: (e) => setSearchTerm(e.target.value),
-                        placeholder: 'Search expenses...',
-                        className: 'search-input'
-                    }),
-                    currentUser.role === 'driver' && React.createElement('button', {
-                        onClick: () => setShowAddExpense(true),
-                        className: 'add-expense-btn'
-                    }, [
-                        React.createElement('i', { className: 'fas fa-plus', style: { marginRight: '8px' } }),
-                        'Add Expense'
-                    ])
-                ]),
+                    try {
+                        var expense = {
+                            id: 'exp-' + Date.now(),
+                            title: newExpense.title,
+                            amount: parseFloat(newExpense.amount),
+                            date: newExpense.date,
+                            description: newExpense.description,
+                            tags: newExpense.tags,
+                            driverId: currentUser.id,
+                            driverName: currentUser.name,
+                            driverUsername: currentUser.username,
+                            createdAt: new Date().toISOString()
+                        };
 
-                React.createElement('div', { className: 'tag-buttons' }, 
-                tags.map(tag => 
-                    React.createElement('button', {
-                        key: tag.id,
-                        onClick: () => setSelectedTags(
-                            selectedTags.includes(tag.id) 
-                                ? selectedTags.filter(t => t !== tag.id)
-                                : selectedTags.concat([tag.id])
-                        ),
-                        className: 'tag-btn ' + (selectedTags.includes(tag.id) ? 'active' : ''),
-                        style: { 
-                            borderColor: selectedTags.includes(tag.id) ? tag.color : '#e1e5e9',
-                            backgroundColor: selectedTags.includes(tag.id) ? tag.color : 'white',
-                            color: selectedTags.includes(tag.id) ? 'white' : '#333'
-                        }
-                    }, tag.name)
-                )
-                ),
+                        var allExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                        allExpenses.push(expense);
+                        localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(allExpenses));
+                        loadExpenses();
+                        
+                        setNewExpense({
+                            title: '',
+                            amount: '',
+                            date: new Date().toISOString().split('T')[0],
+                            description: '',
+                            tags: []
+                        });
+                        setShowAddExpense(false);
+                    } catch (e) {
+                        alert('Error saving expense');
+                    }
+                };
 
-                showAddExpense && React.createElement('div', { className: 'expense-form' }, [
-                    React.createElement('h3', null, 'Add New Expense'),
-                    React.createElement('div', { className: 'form-row' }, [
-                        React.createElement('div', { className: 'form-group' }, [
-                            React.createElement('label', null, 'Title'),
-                            React.createElement('input', {
-                                type: 'text',
-                                value: newExpense.title,
-                                onChange: (e) => setNewExpense({...newExpense, title: e.target.value}),
-                                placeholder: 'Expense Title'
-                            })
-                        ]),
-                        React.createElement('div', { className: 'form-group' }, [
-                            React.createElement('label', null, 'Amount'),
-                            React.createElement('input', {
-                                type: 'number',
-                                value: newExpense.amount,
-                                onChange: (e) => setNewExpense({...newExpense, amount: e.target.value}),
-                                placeholder: 'Amount'
-                            })
+                var filteredExpenses = expenses.filter(function(expense) {
+                    var matchesSearch = 
+                        expense.title.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+                        expense.description.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+                        expense.driverName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+                    
+                    var matchesTags = selectedTags.length === 0 || 
+                        selectedTags.some(function(tagId) { return expense.tags.indexOf(tagId) !== -1; });
+                    
+                    if (currentUser && currentUser.role === 'driver') {
+                        return matchesSearch && matchesTags && expense.driverId === currentUser.id;
+                    }
+                    
+                    return matchesSearch && matchesTags;
+                });
+
+                var totalExpenses = filteredExpenses.reduce(function(sum, exp) { return sum + exp.amount; }, 0);
+
+                var logout = function() {
+                    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+                    window.location.reload();
+                };
+
+                var isAdmin = currentUser && currentUser.role === 'admin';
+
+                return React.createElement('div', { className: 'container' }, [
+                    React.createElement('div', { className: 'header' }, [
+                        React.createElement('h1', null, 'Expense Management System'),
+                        React.createElement('div', null, [
+                            React.createElement('div', { className: 'user-info' }, 'Welcome, ' + (currentUser ? currentUser.name : '') + ' (' + (currentUser ? currentUser.role : '') + ')'),
+                            React.createElement('button', { onClick: logout, className: 'logout-btn' }, 'Logout')
                         ])
                     ]),
-                    React.createElement('div', { className: 'form-row' }, [
-                        React.createElement('div', { className: 'form-group' }, [
-                            React.createElement('label', null, 'Date'),
-                            React.createElement('input', {
-                                type: 'date',
-                                value: newExpense.date,
-                                onChange: (e) => setNewExpense({...newExpense, date: e.target.value})
-                            })
-                        ]),
-                        React.createElement('div', { className: 'form-group' }, [
-                            React.createElement('label', null, 'Tags'),
-                            React.createElement('div', { className: 'tag-buttons' }, 
-                            tags.map(tag => 
-                                React.createElement('button', {
-                                    key: tag.id,
-                                    type: 'button',
-                                    onClick: () => setNewExpense({
-                                        ...newExpense,
-                                        tags: newExpense.tags.includes(tag.id)
-                                            ? newExpense.tags.filter(t => t !== tag.id)
-                                            : newExpense.tags.concat([tag.id])
-                                    }),
-                                    className: 'tag-btn ' + (newExpense.tags.includes(tag.id) ? 'active' : ''),
-                                    style: { 
-                                        borderColor: newExpense.tags.includes(tag.id) ? tag.color : '#e1e5e9',
-                                        backgroundColor: newExpense.tags.includes(tag.id) ? tag.color : 'white',
-                                        color: newExpense.tags.includes(tag.id) ? 'white' : '#333'
-                                    }
-                                }, tag.name)
-                            )
-                            )
-                        ])
-                    ]),
-                    React.createElement('div', { className: 'form-row-full' }, [
-                        React.createElement('label', null, 'Description'),
-                        React.createElement('textarea', {
-                            value: newExpense.description,
-                            onChange: (e) => setNewExpense({...newExpense, description: e.target.value}),
-                            placeholder: 'Description'
-                        })
-                    ]),
-                    React.createElement('div', { style: { display: 'flex', gap: '10px' } }, [
-                        React.createElement('button', {
-                            onClick: handleAddExpense,
-                            className: 'btn',
-                            style: { background: '#28a745' }
-                        }, 'Save Expense'),
-                        React.createElement('button', {
-                            onClick: () => setShowAddExpense(false),
-                            className: 'btn',
-                            style: { background: '#6c757d' }
-                        }, 'Cancel')
-                    ])
-                ]),
 
-                React.createElement('div', { className: 'expense-grid' }, 
-                filteredExpenses.map(expense => 
-                    React.createElement('div', { key: expense.id, className: 'expense-card' }, [
-                        React.createElement('div', { className: 'expense-header' }, [
-                            React.createElement('h3', { className: 'expense-title' }, expense.title),
-                            React.createElement('div', { className: 'expense-amount' }, formatCurrency(expense.amount))
+                    React.createElement('div', { className: 'total-display' }, [
+                        'Total Expenses: ' + formatCurrency(totalExpenses)
+                    ]),
+
+                    React.createElement('div', { className: 'search-bar' }, [
+                        React.createElement('input', {
+                            type: 'text',
+                            value: searchTerm,
+                            onChange: function(e) { return setSearchTerm(e.target.value); },
+                            placeholder: 'Search expenses...',
+                            className: 'search-input'
+                        }),
+                        currentUser && currentUser.role === 'driver' ? React.createElement('button', {
+                            onClick: function() { return setShowAddExpense(true); },
+                            className: 'add-expense-btn'
+                        }, [
+                            React.createElement('i', { className: 'fas fa-plus', style: { marginRight: '8px' } }),
+                            'Add Expense'
+                        ]) : null
+                    ]),
+
+                    React.createElement('div', { className: 'tag-buttons' }, 
+                    tags.map(function(tag) { 
+                        return React.createElement('button', {
+                            key: tag.id,
+                            onClick: function() { 
+                                return setSelectedTags(
+                                    selectedTags.indexOf(tag.id) !== -1 
+                                        ? selectedTags.filter(function(t) { return t !== tag.id; })
+                                        : selectedTags.concat([tag.id])
+                                ); 
+                            },
+                            className: 'tag-btn ' + (selectedTags.indexOf(tag.id) !== -1 ? 'active' : ''),
+                            style: { 
+                                borderColor: selectedTags.indexOf(tag.id) !== -1 ? tag.color : '#e1e5e9',
+                                backgroundColor: selectedTags.indexOf(tag.id) !== -1 ? tag.color : 'white',
+                                color: selectedTags.indexOf(tag.id) !== -1 ? 'white' : '#333'
+                            }
+                        }, tag.name);
+                    })
+                    ),
+
+                    showAddExpense ? React.createElement('div', { className: 'expense-form' }, [
+                        React.createElement('h3', null, 'Add New Expense'),
+                        React.createElement('div', { className: 'form-row' }, [
+                            React.createElement('div', { className: 'form-group' }, [
+                                React.createElement('label', null, 'Title'),
+                                React.createElement('input', {
+                                    type: 'text',
+                                    value: newExpense.title,
+                                    onChange: function(e) { 
+                                        return setNewExpense(Object.assign({}, newExpense, {title: e.target.value})); 
+                                    },
+                                    placeholder: 'Expense Title'
+                                })
+                            ]),
+                            React.createElement('div', { className: 'form-group' }, [
+                                React.createElement('label', null, 'Amount'),
+                                React.createElement('input', {
+                                    type: 'number',
+                                    value: newExpense.amount,
+                                    onChange: function(e) { 
+                                        return setNewExpense(Object.assign({}, newExpense, {amount: e.target.value})); 
+                                    },
+                                    placeholder: 'Amount'
+                                })
+                            ])
                         ]),
-                        React.createElement('p', { className: 'expense-description' }, expense.description),
-                        React.createElement('div', { className: 'expense-tags' }, 
-                        expense.tags.map(tagId => {
-                            const tag = tags.find(t => t.id === tagId);
-                            return tag ? React.createElement('span', {
-                                key: tagId,
-                                className: 'expense-tag',
-                                style: { backgroundColor: tag.color + '20', color: tag.color }
-                            }, tag.name) : null;
-                        })
-                        ),
-                        React.createElement('div', { className: 'expense-meta' }, [
-                            'Driver: ' + expense.driverName,
-                            React.createElement('br'),
-                            'Date: ' + new Date(expense.date).toLocaleDateString()
-                        ]),
-                        React.createElement('div', { className: 'expense-actions' }, [
-                            (currentUser.role === 'admin' || expense.driverId === currentUser.id) && React.createElement('button', {
-                                onClick: () => {
-                                    if (confirm('Delete this expense?')) {
-                                        const allExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
-                                        const filtered = allExpenses.filter(e => e.id !== expense.id);
-                                        localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(filtered));
-                                        loadExpenses();
-                                    }
+                        React.createElement('div', { className: 'form-row-full' }, [
+                            React.createElement('label', null, 'Description'),
+                            React.createElement('textarea', {
+                                value: newExpense.description,
+                                onChange: function(e) { 
+                                    return setNewExpense(Object.assign({}, newExpense, {description: e.target.value})); 
                                 },
-                                className: 'action-btn delete-btn'
-                            }, 'Delete')
+                                placeholder: 'Description'
+                            })
+                        ]),
+                        React.createElement('div', { style: { display: 'flex', gap: '10px' } }, [
+                            React.createElement('button', {
+                                onClick: handleAddExpense,
+                                className: 'btn',
+                                style: { background: '#28a745' }
+                            }, 'Save Expense'),
+                            React.createElement('button', {
+                                onClick: function() { return setShowAddExpense(false); },
+                                className: 'btn',
+                                style: { background: '#6c757d' }
+                            }, 'Cancel')
                         ])
-                    ])
-                )
-            ])
-        };
+                    ]) : null,
 
-        const App = () => {
-            const [currentUser, setCurrentUser] = useState(null);
-
-            useEffect(() => {
-                initializeData();
-                const savedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-                if (savedUser) {
-                    setCurrentUser(JSON.parse(savedUser));
-                }
-            }, []);
-
-            const logout = () => {
-                setCurrentUser(null);
-                localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+                    React.createElement('div', { className: 'expense-grid' }, 
+                    filteredExpenses.map(function(expense) { 
+                        return React.createElement('div', { key: expense.id, className: 'expense-card' }, [
+                            React.createElement('div', { className: 'expense-header' }, [
+                                React.createElement('h3', { className: 'expense-title' }, expense.title),
+                                React.createElement('div', { className: 'expense-amount' }, formatCurrency(expense.amount))
+                            ]),
+                            React.createElement('p', { className: 'expense-description' }, expense.description),
+                            React.createElement('div', { className: 'expense-meta' }, [
+                                'Driver: ' + expense.driverName,
+                                React.createElement('br'),
+                                'Date: ' + new Date(expense.date).toLocaleDateString()
+                            ]),
+                            React.createElement('div', { className: 'expense-actions' }, [
+                                (currentUser && (currentUser.role === 'admin' || expense.driverId === currentUser.id)) ? React.createElement('button', {
+                                    onClick: function() {
+                                        if (confirm('Delete this expense?')) {
+                                            try {
+                                                var allExpenses = JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || '[]');
+                                                var filtered = allExpenses.filter(function(e) { return e.id !== expense.id; });
+                                                localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(filtered));
+                                                loadExpenses();
+                                            } catch (e) {
+                                                alert('Error deleting expense');
+                                            }
+                                        }
+                                    },
+                                    className: 'action-btn delete-btn'
+                                }, 'Delete') : null
+                            ])
+                        ]);
+                    })
+                    )
+                ]);
             };
 
-            if (!currentUser) {
-                return React.createElement(Login);
+            const App = function() {
+                var currentUserState = useState(null);
+                var setCurrentUser = currentUserState[1];
+                var currentUser = currentUserState[0];
+
+                useEffect(function() {
+                    initializeData();
+                    try {
+                        var savedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+                        if (savedUser) {
+                            setCurrentUser(JSON.parse(savedUser));
+                        }
+                    } catch (e) {
+                        console.error('Error loading current user:', e);
+                    }
+                }, []);
+
+                var logout = function() {
+                    setCurrentUser(null);
+                    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+                };
+
+                if (!currentUser) {
+                    return React.createElement(Login);
+                }
+
+                return React.createElement(AuthContext.Provider, {
+                    value: { currentUser: currentUser, logout: logout }
+                }, React.createElement(Dashboard));
+            };
+
+            try {
+                var root = ReactDOM.createRoot(document.getElementById('root'));
+                root.render(React.createElement(App));
+            } catch (e) {
+                console.error('Error rendering app:', e);
+                document.getElementById('root').innerHTML = '<div style="padding: 20px; text-align: center; color: white; font-size: 18px;">Error loading application. Please refresh the page.</div>';
             }
-
-            return React.createElement(AuthContext.Provider, {
-                value: { currentUser, logout }
-            }, React.createElement(Dashboard));
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(App));
+        });
     </script>
 </body>
 </html>
