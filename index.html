@@ -6,6 +6,8 @@
     <title>Truck Driver Expense Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -288,16 +290,16 @@
 
     <script>
         // Simple state management
-        var currentUser = null;
-        var expenses = [];
-        var users = [];
-        var tags = [];
-        var availableColors = ['#dc3545', '#fd7e14', '#28a745', '#17a2b8', '#6f42c1', '#e83e8c', '#6610f2', '#6c757d', '#007bff', '#20c997'];
-        var selectedTags = [];
-        var selectedFilterTags = [];
-        var selectedTagColor = '#007bff';
-        var uploadedFile = null;
-        var editingUserId = null;
+        let currentUser = null;
+        let expenses = [];
+        let users = [];
+        let tags = [];
+        const availableColors = ['#dc3545', '#fd7e14', '#28a745', '#17a2b8', '#6f42c1', '#e83e8c', '#6610f2', '#6c757d', '#007bff', '#20c997'];
+        let selectedTags = [];
+        let selectedFilterTags = [];
+        let selectedTagColor = '#007bff';
+        let uploadedFile = null;
+        let editingUserId = null;
 
         // Database simulation
         const db = {
@@ -382,7 +384,7 @@
             
             // Initialize default data if not exists
             if (!localStorage.getItem('tdems_users')) {
-                var defaultAdmin = {
+                const defaultAdmin = {
                     id: 'admin-001',
                     username: 'admin',
                     password: 'admin123',
@@ -393,7 +395,7 @@
             }
             
             if (!localStorage.getItem('tdems_tags')) {
-                var defaultTags = [
+                const defaultTags = [
                     { id: 'fuel', name: 'Fuel', color: '#dc3545' },
                     { id: 'maintenance', name: 'Maintenance', color: '#fd7e14' },
                     { id: 'food', name: 'Food', color: '#28a745' },
@@ -409,7 +411,7 @@
 
         // Check authentication
         function checkAuth() {
-            var savedUser = localStorage.getItem('tdems_current_user');
+            const savedUser = localStorage.getItem('tdems_current_user');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 showDashboard();
@@ -418,9 +420,9 @@
             }
         }
 
-        // Show login screen - FIXED VERSION
+        // Show login screen
         function showLogin() {
-            var app = document.getElementById('app');
+            const app = document.getElementById('app');
             app.innerHTML = 
                 '<div class="flex items-center justify-center min-h-[80vh]">' +
                     '<div class="login-card text-center">' +
@@ -448,14 +450,14 @@
                 '</div>';
         }
 
-        // Handle login - FIXED VERSION
+        // Handle login
         function handleLogin() {
-            var username = document.getElementById('username').value;
-            var password = document.getElementById('password').value;
-            var errorDiv = document.getElementById('loginError');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
 
-            var users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
-            var user = users.find(function(u) { return u.username === username && u.password === password; });
+            const users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
+            const user = users.find(u => u.username === username && u.password === password);
 
             if (user) {
                 localStorage.setItem('tdems_current_user', JSON.stringify(user));
@@ -476,19 +478,29 @@
 
         // Load data
         async function loadData() {
-            let u = await db.executeQuery('SELECT * FROM users'); 
-            if(u.success) users = u.data;
-            let e = await db.executeQuery('SELECT * FROM expenses'); 
-            if(e.success) expenses = e.data;
-            let t = await db.executeQuery('SELECT * FROM tags'); 
-            if(t.success) tags = t.data;
+            try {
+                // Load directly from localStorage
+                users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
+                expenses = JSON.parse(localStorage.getItem('tdems_expenses') || '[]');
+                tags = JSON.parse(localStorage.getItem('tdems_tags') || '[]');
+                
+                console.log('Loaded from localStorage:');
+                console.log('Users:', users.length);
+                console.log('Expenses:', expenses.length);
+                console.log('Tags:', tags.length);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                users = [];
+                expenses = [];
+                tags = [];
+            }
         }
 
         // Show dashboard
         async function showDashboard() {
             await loadData();
-            let app = document.getElementById('app');
-            let isAdmin = currentUser?.role === 'admin';
+            const app = document.getElementById('app');
+            const isAdmin = currentUser?.role === 'admin';
             
             app.innerHTML = `
                 <div class="dashboard-card">
@@ -497,7 +509,7 @@
                         <h1 class="text-3xl font-black text-black tracking-tight">💰 Expense Management</h1>
                         <div class="flex items-center gap-6">
                             <span class="text-gray-600 font-medium">${currentUser.name} (${currentUser.role})</span>
-                            ${isAdmin ? '<button class="btn-secondary text-sm py-2 px-5" onclick="exportToPDF()"><i class="fas fa-file-pdf mr-2"></i>Export PDF</button>' : ''}
+                            ${isAdmin ? '<button class="btn-primary text-sm py-2 px-5" onclick="handleExportPDF()"><i class="fas fa-file-pdf mr-2"></i>Export PDF</button>' : ''}
                             <button class="btn-danger text-sm py-2 px-5" onclick="logout()">Logout</button>
                         </div>
                     </div>
@@ -602,7 +614,7 @@
             
             // Populate driver dropdown for admin
             if (isAdmin) {
-                let sel = document.getElementById('expenseDriver');
+                const sel = document.getElementById('expenseDriver');
                 if (sel) {
                     sel.innerHTML = '<option value="">Select driver</option>';
                     users.filter(u => u.role === 'driver').forEach(d => {
@@ -614,17 +626,17 @@
 
         function showTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tab+'Tab').classList.remove('hidden');
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
         }
 
         function renderTags() {
-            let container = document.getElementById('filterTags');
+            const container = document.getElementById('filterTags');
             if (!container) return;
             container.innerHTML = '';
             tags.forEach(t => {
-                let btn = document.createElement('button');
+                const btn = document.createElement('button');
                 btn.className = `filter-tag ${selectedFilterTags.includes(t.id) ? 'active' : ''}`;
                 btn.style.backgroundColor = selectedFilterTags.includes(t.id) ? t.color : '';
                 btn.style.borderColor = selectedFilterTags.includes(t.id) ? t.color : '#e2e8f0';
@@ -635,8 +647,8 @@
         }
 
         function toggleFilterTag(id) {
-            let idx = selectedFilterTags.indexOf(id);
-            idx === -1 ? selectedFilterTags.push(id) : selectedFilterTags.splice(idx,1);
+            const idx = selectedFilterTags.indexOf(id);
+            idx === -1 ? selectedFilterTags.push(id) : selectedFilterTags.splice(idx, 1);
             renderTags();
             renderExpenses();
         }
@@ -653,48 +665,48 @@
         }
 
         function populateTagsDropdown() {
-            let sel = document.getElementById('expenseTags');
+            const sel = document.getElementById('expenseTags');
             if (!sel) return;
             sel.innerHTML = '';
             tags.forEach(t => sel.innerHTML += `<option value="${t.id}">${t.name}</option>`);
         }
 
         function handleFileSelect(e) {
-            let file = e.target.files[0];
+            const file = e.target.files[0];
             if (!file) return;
             uploadedFile = file;
-            document.getElementById('fileInfo').innerHTML = `<span class="text-green-600">${file.name} (${(file.size/1024).toFixed(1)} KB)</span>`;
+            document.getElementById('fileInfo').innerHTML = `<span class="text-green-600">${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>`;
         }
 
         function fileToBase64(file, cb) { 
-            let r = new FileReader(); 
+            const r = new FileReader(); 
             r.onload = () => cb(r.result); 
             r.readAsDataURL(file); 
         }
 
         async function saveExpense() {
-            let title = document.getElementById('expenseTitle').value;
-            let amount = parseFloat(document.getElementById('expenseAmount').value);
-            let desc = document.getElementById('expenseDescription').value;
-            let docName = document.getElementById('documentName').value;
+            const title = document.getElementById('expenseTitle').value;
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const desc = document.getElementById('expenseDescription').value;
+            const docName = document.getElementById('documentName').value;
             
             if (!title || !amount) return alert('Title & amount required');
             
-            let tagSelect = document.getElementById('expenseTags');
-            let selected = Array.from(tagSelect.selectedOptions).map(o => o.value);
+            const tagSelect = document.getElementById('expenseTags');
+            const selected = Array.from(tagSelect.selectedOptions).map(o => o.value);
             
             let driverId = currentUser.id, driverName = currentUser.name, driverUsername = currentUser.username;
             
             if (currentUser.role === 'admin') {
-                let dSel = document.getElementById('expenseDriver');
+                const dSel = document.getElementById('expenseDriver');
                 if (dSel && dSel.value) {
-                    let d = users.find(u => u.id === dSel.value);
+                    const d = users.find(u => u.id === dSel.value);
                     if (d) { driverId = d.id; driverName = d.name; driverUsername = d.username; }
                 }
             }
             
-            let expense = { 
-                id: 'exp-'+Date.now(), 
+            const expense = { 
+                id: 'exp-' + Date.now(), 
                 title, 
                 amount, 
                 description: desc, 
@@ -702,7 +714,7 @@
                 driverId, 
                 driverName, 
                 driverUsername, 
-                date: new Date().toISOString().slice(0,10) 
+                date: new Date().toISOString().slice(0, 10) 
             };
             
             if (uploadedFile) {
@@ -719,7 +731,7 @@
         }
 
         async function finalSave(exp) {
-            let r = await db.executeQuery('INSERT INTO expenses (title, amount, description, tags, driverId, driverName, driverUsername, date, file) VALUES (?,?,?,?,?,?,?,?,?)',
+            const r = await db.executeQuery('INSERT INTO expenses (title, amount, description, tags, driverId, driverName, driverUsername, date, file) VALUES (?,?,?,?,?,?,?,?,?)',
                 [exp.title, exp.amount, exp.description, JSON.stringify(exp.tags), exp.driverId, exp.driverName, exp.driverUsername, exp.date, exp.file ? JSON.stringify(exp.file) : null]);
             if (r.success) { 
                 expenses.push(exp); 
@@ -729,7 +741,7 @@
         }
 
         function deleteExpense(id) { 
-            if(confirm('Delete expense?')) { 
+            if (confirm('Delete expense?')) { 
                 expenses = expenses.filter(e => e.id !== id); 
                 localStorage.setItem('tdems_expenses', JSON.stringify(expenses)); 
                 renderExpenses(); 
@@ -737,10 +749,10 @@
         }
 
         function renderExpenses() {
-            let grid = document.getElementById('expensesGrid');
+            const grid = document.getElementById('expensesGrid');
             if (!grid) return;
             
-            let search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
             let filtered = expenses.filter(e => 
                 (e.title.toLowerCase().includes(search) || 
                  e.description.toLowerCase().includes(search) || 
@@ -752,8 +764,8 @@
                 filtered = filtered.filter(e => e.tags?.some(t => selectedFilterTags.includes(t)));
             }
             
-            let total = filtered.reduce((s,e) => s + e.amount, 0);
-            let totalEl = document.getElementById('totalDisplay');
+            const total = filtered.reduce((s, e) => s + e.amount, 0);
+            const totalEl = document.getElementById('totalDisplay');
             if (totalEl) totalEl.innerText = `Total: $${total.toFixed(2)}`;
             
             if (!filtered.length) { 
@@ -762,12 +774,12 @@
             }
             
             grid.innerHTML = filtered.map(e => {
-                let tagChips = (e.tags || []).map(tid => { 
-                    let t = tags.find(tt => tt.id === tid); 
+                const tagChips = (e.tags || []).map(tid => { 
+                    const t = tags.find(tt => tt.id === tid); 
                     return t ? `<span class="tag-chip" style="background:${t.color}20; color:${t.color}; border:1px solid ${t.color}40">${t.name}</span>` : ''; 
                 }).join(' ');
                 
-                let fileHtml = e.file ? `<div class="flex items-center gap-3 mt-4"><i class="fas fa-paperclip text-cyan-600"></i><span class="text-sm">${e.file.displayName || e.file.name}</span><button class="bg-cyan-500 text-white px-4 py-1 rounded-full text-xs" onclick='viewFile("${e.file.data}","${e.file.name}","${e.file.type}")'>View</button></div>` : '';
+                const fileHtml = e.file ? `<div class="flex items-center gap-3 mt-4"><i class="fas fa-paperclip text-cyan-600"></i><span class="text-sm">${e.file.displayName || e.file.name}</span><button class="bg-cyan-500 text-white px-4 py-1 rounded-full text-xs" onclick='viewFile("${e.file.data}")'>View</button></div>` : '';
                 
                 return `<div class="expense-card">
                     <div class="flex justify-between items-start mb-4">
@@ -784,8 +796,8 @@
         }
 
         function renderUsers() {
-            let g = document.getElementById('usersGrid'); 
-            if(!g) return;
+            const g = document.getElementById('usersGrid'); 
+            if (!g) return;
             g.innerHTML = users.map(u => `<div class="grid-card">
                 <h4 class="font-bold text-lg">${u.name}</h4>
                 <p class="text-sm text-gray-500">@${u.username} · ${u.role}</p>
@@ -797,7 +809,7 @@
         }
 
         function deleteUser(id) { 
-            if(confirm('Delete user?')) { 
+            if (confirm('Delete user?')) { 
                 users = users.filter(u => u.id !== id); 
                 localStorage.setItem('tdems_users', JSON.stringify(users)); 
                 renderUsers(); 
@@ -805,8 +817,8 @@
         }
 
         function editUser(id) { 
-            let u = users.find(x => x.id === id); 
-            if(!u) return; 
+            const u = users.find(x => x.id === id); 
+            if (!u) return; 
             editingUserId = id; 
             document.getElementById('editUsername').value = u.username; 
             document.getElementById('editFullName').value = u.name; 
@@ -820,27 +832,27 @@
         }
         
         function updateUser() { 
-            let u = users.find(x => x.id === editingUserId); 
-            if(!u) return; 
+            const u = users.find(x => x.id === editingUserId); 
+            if (!u) return; 
             u.username = document.getElementById('editUsername').value; 
             u.name = document.getElementById('editFullName').value; 
             u.role = document.getElementById('editRole').value; 
-            let pw = document.getElementById('editPassword').value; 
-            if(pw) u.password = pw; 
+            const pw = document.getElementById('editPassword').value; 
+            if (pw) u.password = pw; 
             localStorage.setItem('tdems_users', JSON.stringify(users)); 
             cancelEditUser(); 
             renderUsers(); 
         }
 
         async function addUser() {
-            let username = document.getElementById('newUsername').value;
-            let pw = document.getElementById('newPassword').value;
-            let name = document.getElementById('newFullName').value;
-            let role = document.getElementById('newRole').value;
+            const username = document.getElementById('newUsername').value;
+            const pw = document.getElementById('newPassword').value;
+            const name = document.getElementById('newFullName').value;
+            const role = document.getElementById('newRole').value;
             
             if (!username || !pw || !name) return alert('All fields required');
             
-            let r = await db.executeQuery('INSERT INTO users (username, password, role, name) VALUES (?,?,?,?)', [username, pw, role, name]);
+            const r = await db.executeQuery('INSERT INTO users (username, password, role, name) VALUES (?,?,?,?)', [username, pw, role, name]);
             if (r.success) { 
                 users.push({ id: r.insertId, username, password: pw, role, name }); 
                 renderUsers(); 
@@ -851,8 +863,8 @@
         }
 
         function renderTagsGrid() {
-            let g = document.getElementById('tagsGrid'); 
-            if(!g) return;
+            const g = document.getElementById('tagsGrid'); 
+            if (!g) return;
             g.innerHTML = tags.map(t => `<div class="grid-card flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <span class="w-6 h-6 rounded-full" style="background:${t.color}"></span>
@@ -863,8 +875,8 @@
         }
 
         function renderColorPicker() {
-            let picker = document.getElementById('colorPicker'); 
-            if(!picker) return;
+            const picker = document.getElementById('colorPicker'); 
+            if (!picker) return;
             picker.innerHTML = availableColors.map(c => 
                 `<div class="w-10 h-10 rounded-full cursor-pointer border-4 ${c === selectedTagColor ? 'border-primary scale-110' : 'border-transparent'}" 
                       style="background:${c}" onclick="selectedTagColor='${c}'; renderColorPicker()"></div>`
@@ -872,10 +884,10 @@
         }
 
         function addTag() {
-            let name = document.getElementById('newTagName').value;
+            const name = document.getElementById('newTagName').value;
             if (!name) return alert('enter tag name');
             if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) return alert('exists');
-            let newTag = { id: 'tag-'+Date.now(), name, color: selectedTagColor };
+            const newTag = { id: 'tag-' + Date.now(), name, color: selectedTagColor };
             tags.push(newTag); 
             localStorage.setItem('tdems_tags', JSON.stringify(tags)); 
             renderTagsGrid(); 
@@ -884,7 +896,7 @@
         }
 
         function deleteTag(id) { 
-            if(confirm('Delete tag?')) { 
+            if (confirm('Delete tag?')) { 
                 tags = tags.filter(t => t.id !== id); 
                 localStorage.setItem('tdems_tags', JSON.stringify(tags)); 
                 renderTagsGrid(); 
@@ -892,8 +904,106 @@
             } 
         }
 
-        function exportToPDF() { alert('PDF export ready (mock)'); }
-        function viewFile(data, name, type) { window.open(data); }
+        function handleExportPDF() {
+            console.log('Export PDF button clicked');
+            console.log('Current user role:', currentUser?.role);
+            
+            if (currentUser?.role !== 'admin') {
+                alert('Only admins can export expenses');
+                return;
+            }
+
+            // Load latest data before export
+            loadData().then(() => {
+                console.log('Data loaded, expenses count:', expenses.length);
+                console.log('Tags available:', tags.length);
+                
+                if (!expenses.length) {
+                    alert('No expenses to export');
+                    return;
+                }
+
+                try {
+                    exportToPDF();
+                } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Error generating PDF: ' + error.message);
+                }
+            });
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(20);
+            doc.setTextColor(16, 185, 129);
+            doc.text('Expense Report', 14, 22);
+            
+            // Add generation date
+            doc.setFontSize(11);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 32);
+            
+            // Add summary
+            const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Total Expenses: $${total.toFixed(2)}`, 14, 42);
+            doc.text(`Number of Expenses: ${expenses.length}`, 14, 52);
+            
+            // Prepare table data
+            const tableData = expenses.map(e => {
+                const expenseTags = (e.tags || []).map(tid => {
+                    const tag = tags.find(t => t.id === tid);
+                    return tag ? tag.name : '';
+                }).filter(Boolean).join(', ');
+                
+                return [
+                    new Date(e.date).toLocaleDateString(),
+                    e.title.substring(0, 30),
+                    e.driverName,
+                    `$${e.amount.toFixed(2)}`,
+                    expenseTags.substring(0, 30)
+                ];
+            });
+            
+            // Add table
+            doc.autoTable({
+                startY: 60,
+                head: [['Date', 'Title', 'Driver', 'Amount', 'Tags']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [16, 185, 129],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 253, 244]
+                },
+                margin: { top: 60 },
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3
+                },
+                columnStyles: {
+                    0: { cellWidth: 30 },
+                    1: { cellWidth: 50 },
+                    2: { cellWidth: 40 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 45 }
+                }
+            });
+            
+            // Save the PDF
+            doc.save(`expenses_report_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        function viewFile(data) { 
+            window.open(data); 
+        }
 
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
@@ -902,7 +1012,7 @@
                 init();
             } catch (error) {
                 console.error('Error initializing app:', error);
-                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="bg-white rounded-2xl shadow-2xl p-8 text-center"><div class="text-red-500 text-xl font-bold mb-4">Error initializing app</div><div class="text-gray-600">' + error.message + '</div><button onclick="location.reload()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg btn-hover">Refresh Page</button></div></div>';
+                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="bg-white rounded-2xl shadow-2xl p-8 text-center"><div class="text-red-500 text-xl font-bold mb-4">Error initializing app</div><div class="text-gray-600">' + error.message + '</div><button onclick="location.reload()" class="mt-4 btn-primary">Refresh Page</button></div></div>';
             }
         });
     </script>
