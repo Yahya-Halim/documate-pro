@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
@@ -22,7 +28,7 @@ jobs:
       run: npm ci
       
     - name: Build
-      run: npm run build
+      run: npm run build:cloud
       
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -30,7 +36,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: './dist'
+        path: './dist-cloud'
         
     - name: Deploy to GitHub Pages
       id: deployment
