@@ -3,34 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Truck Driver Expense Tracker</title>
+    <title>FleetTracker</title>
+    <!-- Tailwind + Font Awesome + jspdf -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#10b981',
-                        secondary: '#059669',
-                        accent: '#047857',
-                        dark: '#000000',
-                        light: '#ffffff'
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        /* modern clean styling – perfect layout */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
@@ -40,15 +20,7 @@
             justify-content: center;
             padding: 1.5rem;
         }
-
-        /* main app card */
-        #app {
-            width: 100%;
-            max-width: 1440px;
-            margin: 0 auto;
-        }
-
-        /* glassmorphism effect for inner containers */
+        #app { width: 100%; max-width: 1440px; margin: 0 auto; }
         .dashboard-card {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(8px);
@@ -56,8 +28,6 @@
             box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.1) inset;
             overflow: hidden;
         }
-
-        /* login card specific */
         .login-card {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(8px);
@@ -67,8 +37,6 @@
             width: 100%;
             max-width: 480px;
         }
-
-        /* tabs with underline animation */
         .tab-btn {
             position: relative;
             font-weight: 600;
@@ -78,13 +46,7 @@
             cursor: pointer;
             border-bottom: 3px solid transparent;
         }
-        .tab-btn.active {
-            color: #10b981;
-            border-bottom-color: #10b981;
-            background: linear-gradient(to top, #ecfdf5, transparent);
-        }
-
-        /* form elements consistent */
+        .tab-btn.active { color: #10b981; border-bottom-color: #10b981; background: linear-gradient(to top, #ecfdf5, transparent); }
         input, select, textarea {
             border: 2px solid #e2e8f0 !important;
             border-radius: 1rem !important;
@@ -95,926 +57,955 @@
             color: #0f172a !important;
             width: 100%;
         }
-        input:focus, select:focus, textarea:focus {
-            border-color: #10b981 !important;
-            outline: none !important;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+        input:focus, select:focus, textarea:focus { border-color: #10b981 !important; outline: none !important; box-shadow: 0 0 0 4px rgba(16,185,129,0.15) !important; }
+        label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 0.5rem; }
+        .btn-primary {
+            background: #10b981; color: white; font-weight: 700; padding: 0.875rem 2rem; border-radius: 3rem;
+            transition: all 0.2s; box-shadow: 0 10px 15px -3px rgba(16,185,129,0.3); border: none; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 0.5rem;
         }
-        label {
-            display: block;
-            font-size: 0.75rem;
+        .btn-primary:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(16,185,129,0.4); }
+        .btn-secondary {
+            background: #f1f5f9; color: #1e293b; font-weight: 600; padding: 0.875rem 2rem; border-radius: 3rem;
+            transition: all 0.2s; border: 2px solid #cbd5e1; cursor: pointer;
+        }
+        .btn-secondary:hover { background: #e2e8f0; border-color: #94a3b8; }
+        .btn-danger { background: #ef4444; color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 2rem; transition: all 0.2s; border: none; cursor: pointer; }
+        .btn-danger:hover { background: #dc2626; }
+        .expense-card {
+            background: white; border-radius: 2rem; padding: 1.75rem; box-shadow: 0 8px 20px -6px rgba(0,0,0,0.1);
+            transition: all 0.25s; border: 1px solid #f1f5f9; position: relative; overflow: hidden;
+            cursor: pointer;
+        }
+        .expense-card:hover { transform: translateY(-6px); box-shadow: 0 25px 30px -12px rgba(16,185,129,0.25); border-color: #10b981; }
+        .expense-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #10b981, #059669); }
+        .tag-chip { display: inline-block; padding: 0.35rem 1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .filter-tag { padding: 0.6rem 1.5rem; border-radius: 100px; font-weight: 600; background: white; border: 2px solid #e2e8f0; color: #1e293b; cursor: pointer; transition: all 0.2s; }
+        .filter-tag.active { background: #10b981; border-color: #10b981; color: white; }
+        .file-drop { border: 2px dashed #cbd5e1; border-radius: 1.5rem; background: #f8fafc; padding: 2rem; text-align: center; transition: all 0.2s; cursor: pointer; }
+        .file-drop:hover { border-color: #10b981; background: #f0fdf4; }
+        .grid-card { background: white; border-radius: 1.5rem; padding: 1.5rem; box-shadow: 0 6px 14px rgba(0,0,0,0.04); border: 1px solid #eef2f6; transition: 0.2s; }
+        .grid-card:hover { border-color: #10b981; }
+        .total-badge {
+            background: linear-gradient(145deg, #10b981, #047857); color: white; border-radius: 2rem;
+            padding: 1.5rem 2.5rem; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;
+            box-shadow: 0 15px 30px -10px #10b981; text-align: center; margin-bottom: 2rem;
+        }
+        .hidden { display: none !important; }
+        .modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-content {
+            background: white; border-radius: 2rem; padding: 2rem; max-width: 800px; width: 90%;
+            max-height: 90vh; overflow-y: auto; box-shadow: 0 30px 60px -10px rgba(0,0,0,0.3);
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .summary-item {
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        .summary-label {
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #334155;
-            margin-bottom: 0.5rem;
+            color: #64748b;
+            margin-bottom: 0.25rem;
         }
-
-        /* buttons */
-        .btn-primary {
-            background: #10b981;
-            color: white;
-            font-weight: 700;
-            padding: 0.875rem 2rem;
-            border-radius: 3rem;
-            transition: all 0.2s;
-            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .btn-primary:hover {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
-        }
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #1e293b;
+        .summary-value {
+            font-size: 1rem;
             font-weight: 600;
-            padding: 0.875rem 2rem;
-            border-radius: 3rem;
-            transition: all 0.2s;
-            border: 2px solid #cbd5e1;
-            cursor: pointer;
+            color: #0f172a;
+            word-break: break-word;
         }
-        .btn-secondary:hover {
-            background: #e2e8f0;
-            border-color: #94a3b8;
-        }
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 2rem;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
-        }
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: scale(1.02);
-        }
-
-        /* expense cards */
-        .expense-card {
-            background: white;
-            border-radius: 2rem;
-            padding: 1.75rem;
-            box-shadow: 0 8px 20px -6px rgba(0,0,0,0.1);
-            transition: all 0.25s;
-            border: 1px solid #f1f5f9;
+        .preview-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .preview-table th { background: #10b981; color: white; padding: 0.5rem; position: sticky; top: 0; white-space: nowrap; }
+        .preview-table td { padding: 0.5rem; border-bottom: 1px solid #e2e8f0; }
+        .preview-table tr:hover { background: #f0fdf4; }
+        .delete-btn-on-card {
             position: relative;
-            overflow: hidden;
-        }
-        .expense-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 25px 30px -12px rgba(16, 185, 129, 0.25);
-            border-color: #10b981;
-        }
-        .expense-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #10b981, #059669);
-        }
-
-        /* tag chips */
-        .tag-chip {
-            display: inline-block;
-            padding: 0.35rem 1rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: 0.1s;
-        }
-        .filter-tag {
-            padding: 0.6rem 1.5rem;
-            border-radius: 100px;
-            font-weight: 600;
-            background: white;
-            border: 2px solid #e2e8f0;
-            color: #1e293b;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .filter-tag.active {
-            background: #10b981;
-            border-color: #10b981;
-            color: white;
-        }
-
-        /* file upload area */
-        .file-drop {
-            border: 2px dashed #cbd5e1;
-            border-radius: 1.5rem;
-            background: #f8fafc;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .file-drop:hover {
-            border-color: #10b981;
-            background: #f0fdf4;
-        }
-
-        /* user & tag cards */
-        .grid-card {
-            background: white;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.04);
-            border: 1px solid #eef2f6;
-            transition: 0.2s;
-        }
-        .grid-card:hover {
-            border-color: #10b981;
-        }
-
-        /* total display */
-        .total-badge {
-            background: linear-gradient(145deg, #10b981, #047857);
-            color: white;
-            border-radius: 2rem;
-            padding: 1.5rem 2.5rem;
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            box-shadow: 0 15px 30px -10px #10b981;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        /* layout helpers */
-        .hidden {
-            display: none !important;
-        }
-        .flex-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .gap-2 { gap: 0.75rem; }
-        .gap-3 { gap: 1.25rem; }
-        
-        /* animations */
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        .pulse-animation {
-            animation: pulse 2s infinite;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        .shake-animation {
-            animation: shake 0.5s;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
     <div id="app"></div>
-
     <script>
-        // Simple state management
-        let currentUser = null;
-        let expenses = [];
-        let users = [];
-        let tags = [];
-        const availableColors = ['#dc3545', '#fd7e14', '#28a745', '#17a2b8', '#6f42c1', '#e83e8c', '#6610f2', '#6c757d', '#007bff', '#20c997'];
-        let selectedTags = [];
-        let selectedFilterTags = [];
-        let selectedTagColor = '#007bff';
-        let uploadedFile = null;
-        let editingUserId = null;
+        (function() {
+            // ---------- STATE ----------
+            let currentUser = null;
+            let expenses = [];
+            let users = [];
+            // ----- FIXED 7 TAGS (exactly as specified) -----
+            const tags = [
+                { id: 'rc', name: 'RC', color: '#dc3545', icon: 'fa-file-contract' },
+                { id: 'bol', name: 'BOL', color: '#fd7e14', icon: 'fa-file-invoice' },
+                { id: 'pod', name: 'POD', color: '#28a745', icon: 'fa-file-signature' },
+                { id: 'dispatcher', name: 'Dispatcher', color: '#17a2b8', icon: 'fa-headset' },
+                { id: 'fuel', name: 'Fuel', color: '#6f42c1', icon: 'fa-gas-pump' },
+                { id: 'invoice', name: 'Invoice', color: '#e83e8c', icon: 'fa-file-invoice-dollar' },
+                { id: 'rlp', name: 'RLP', color: '#6610f2', icon: 'fa-file-alt' }
+            ];
+            let selectedFilterTags = [];
+            let uploadedFile = null;
+            let editingUserId = null;
 
-        // Database simulation
-        const db = {
-            async executeQuery(sql, params = []) {
-                console.log('Executing query:', sql, params);
-                
-                if (sql.includes('SELECT') && sql.includes('users')) {
-                    const users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
-                    return { success: true, data: users };
-                }
-                
-                if (sql.includes('SELECT') && sql.includes('expenses')) {
-                    const expenses = JSON.parse(localStorage.getItem('tdems_expenses') || '[]');
-                    return { success: true, data: expenses };
-                }
-                
-                if (sql.includes('SELECT') && sql.includes('tags')) {
-                    const tags = JSON.parse(localStorage.getItem('tdems_tags') || '[]');
-                    return { success: true, data: tags };
-                }
-                
-                if (sql.includes('INSERT') && sql.includes('users')) {
-                    const users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
-                    const newUser = {
-                        id: 'user-' + Date.now(),
-                        username: params[0],
-                        password: params[1],
-                        role: params[2],
-                        name: params[3]
-                    };
-                    users.push(newUser);
+            // ---------- LOAD USERS / EXPENSES FROM STORAGE ----------
+            function loadFromStorage() {
+                users = JSON.parse(localStorage.getItem('tdems_users')) || [];
+                expenses = JSON.parse(localStorage.getItem('tdems_expenses')) || [];
+                // ensure default admin
+                if (!users.length) {
+                    users.push({ id: 'admin-001', username: 'admin', password: 'admin123', role: 'admin', name: 'Fleet Manager' });
                     localStorage.setItem('tdems_users', JSON.stringify(users));
-                    return { success: true, insertId: newUser.id };
                 }
-                
-                if (sql.includes('INSERT') && sql.includes('expenses')) {
-                    const expenses = JSON.parse(localStorage.getItem('tdems_expenses') || '[]');
-                    const newExpense = {
-                        id: 'exp-' + Date.now(),
-                        title: params[0],
-                        amount: parseFloat(params[1]),
-                        description: params[2],
-                        tags: JSON.parse(params[3] || '[]'),
-                        driverId: params[4],
-                        driverName: params[5],
-                        driverUsername: params[6],
-                        date: params[7],
-                        file: params[8] ? JSON.parse(params[8]) : null
-                    };
-                    expenses.push(newExpense);
-                    localStorage.setItem('tdems_expenses', JSON.stringify(expenses));
-                    return { success: true, insertId: newExpense.id };
-                }
-                
-                if (sql.includes('INSERT') && sql.includes('tags')) {
-                    const tags = JSON.parse(localStorage.getItem('tdems_tags') || '[]');
-                    const newTag = {
-                        id: 'tag-' + Date.now(),
-                        name: params[0],
-                        color: params[1]
-                    };
-                    tags.push(newTag);
-                    localStorage.setItem('tdems_tags', JSON.stringify(tags));
-                    return { success: true, insertId: newTag.id };
-                }
-                
-                if (sql.includes('UPDATE')) {
-                    return { success: true, affectedRows: 1 };
-                }
-                
-                if (sql.includes('DELETE')) {
-                    return { success: true, affectedRows: 1 };
-                }
-                
-                return { success: false, error: 'Query not simulated' };
             }
-        };
+            loadFromStorage();
 
-        // Initialize app
-        function init() {
-            console.log('Initializing app...');
-            
-            // Initialize default data if not exists
-            if (!localStorage.getItem('tdems_users')) {
-                const defaultAdmin = {
-                    id: 'admin-001',
-                    username: 'admin',
-                    password: 'admin123',
-                    role: 'admin',
-                    name: 'Fleet Manager'
-                };
-                localStorage.setItem('tdems_users', JSON.stringify([defaultAdmin]));
-            }
-            
-            if (!localStorage.getItem('tdems_tags')) {
-                const defaultTags = [
-                    { id: 'fuel', name: 'Fuel', color: '#dc3545' },
-                    { id: 'maintenance', name: 'Maintenance', color: '#fd7e14' },
-                    { id: 'food', name: 'Food', color: '#28a745' },
-                    { id: 'lodging', name: 'Lodging', color: '#17a2b8' },
-                    { id: 'tolls', name: 'Tolls', color: '#6f42c1' },
-                    { id: 'insurance', name: 'Insurance', color: '#e83e8c' }
-                ];
-                localStorage.setItem('tdems_tags', JSON.stringify(defaultTags));
-            }
-            
-            checkAuth();
-        }
+            // ---------- DOCUMENT FIELDS (only the 7 types, exactly as spec) ----------
+            const documentTypeFields = {
+                rc: [
+                    { id: 'load_number', label: 'Load Number', type: 'text' },
+                    { id: 'dispatcher', label: 'Dispatcher', type: 'text' },
+                    { id: 'broker_shipper', label: 'Broker/Shipper', type: 'text' },
+                    { id: 'pickup_address', label: 'Pickup Address', type: 'text' },
+                    { id: 'pickup_datetime', label: 'Pickup Date/Time', type: 'datetime-local' },
+                    { id: 'dropoff_address', label: 'Dropoff Address', type: 'text' },
+                    { id: 'dropoff_datetime', label: 'Dropoff Date/Time', type: 'datetime-local' },
+                    { id: 'miles', label: 'Miles', type: 'number' },
+                    { id: 'dh_miles', label: 'DH Miles', type: 'number' },
+                    { id: 'total_miles', label: 'Total Miles', type: 'number' },
+                    { id: 'rate_per_mile', label: 'Rate/Mile', type: 'number' },
+                    { id: 'amount', label: 'Amount $', type: 'number' },
+                    { id: 'document_name', label: 'Document Name', type: 'text' }
+                ],
+                bol: [
+                    { id: 'bol_number', label: 'BOL #', type: 'text' },
+                    { id: 'rc_number', label: 'RC Number/Load Number', type: 'text' },
+                    { id: 'load_number', label: 'Load Number', type: 'text' },
+                    { id: 'dispatcher', label: 'Dispatcher', type: 'text' },
+                    { id: 'broker_shipper', label: 'Broker/Shipper', type: 'text' },
+                    { id: 'pickup_address', label: 'Pickup Address', type: 'text' },
+                    { id: 'pickup_datetime', label: 'Pickup Date/Time', type: 'datetime-local' },
+                    { id: 'dropoff_address', label: 'Dropoff Address', type: 'text' },
+                    { id: 'dropoff_datetime', label: 'Dropoff Date/Time', type: 'datetime-local' },
+                    { id: 'miles', label: 'Miles', type: 'number' },
+                    { id: 'dh_miles', label: 'DH Miles', type: 'number' },
+                    { id: 'document_name', label: 'Document Name', type: 'text' }
+                ],
+                pod: [
+                    { id: 'rc_number', label: 'RC Number/Load Number', type: 'text' },
+                    { id: 'load_number', label: 'Load Number', type: 'text' },
+                    { id: 'dispatcher', label: 'Dispatcher', type: 'text' },
+                    { id: 'broker_shipper', label: 'Broker/Shipper', type: 'text' },
+                    { id: 'pickup_address', label: 'Pickup Address', type: 'text' },
+                    { id: 'pickup_datetime', label: 'Pickup Date/Time', type: 'datetime-local' },
+                    { id: 'dropoff_address', label: 'Dropoff Address', type: 'text' },
+                    { id: 'dropoff_datetime', label: 'Dropoff Date/Time', type: 'datetime-local' },
+                    { id: 'miles', label: 'Miles', type: 'number' },
+                    { id: 'document_name', label: 'Document Name', type: 'text' }
+                ],
+                dispatcher: [
+                    { id: 'dispatcher_company', label: 'Dispatcher/Company', type: 'text' },
+                    { id: 'phone_number', label: 'Phone Number', type: 'tel' },
+                    { id: 'email', label: 'Email', type: 'email' },
+                    { id: 'rc_number', label: 'RC Number', type: 'text' },
+                    { id: 'load_number', label: 'Load Number', type: 'text' },
+                    { id: 'broker_shipper', label: 'Broker/Shipper', type: 'text' },
+                    { id: 'pickup_address', label: 'Pickup Address', type: 'text' },
+                    { id: 'pickup_datetime', label: 'Pickup Date/Time', type: 'datetime-local' },
+                    { id: 'dropoff_address', label: 'Dropoff Address', type: 'text' },
+                    { id: 'dropoff_datetime', label: 'Dropoff Date/Time', type: 'datetime-local' },
+                    { id: 'rc_amount', label: 'RC Amount $', type: 'number' },
+                    { id: 'dispatcher_percentage', label: 'Dispatcher %', type: 'number' },
+                    { id: 'dispatcher_amount', label: 'Dispatcher Amount', type: 'number' }
+                ],
+                fuel: [
+                    { id: 'receipt_number', label: 'Receipt #', type: 'text' },
+                    { id: 'receipt_date', label: 'Receipt Date', type: 'date' },
+                    { id: 'amount', label: 'Amount', type: 'number' },
+                    { id: 'rc_number', label: 'RC Number', type: 'text' },
+                    { id: 'load_number', label: 'Load Number', type: 'text' },
+                    { id: 'pickup_address', label: 'Pickup Address', type: 'text' },
+                    { id: 'pickup_datetime', label: 'Pickup Date/Time', type: 'datetime-local' },
+                    { id: 'dropoff_address', label: 'Dropoff Address', type: 'text' },
+                    { id: 'dropoff_datetime', label: 'Dropoff Date/Time', type: 'datetime-local' },
+                    { id: 'rc_amount', label: 'RC Amount $', type: 'number' }
+                ],
+                invoice: [
+                    { id: 'invoice_number', label: 'Invoice #', type: 'text' },
+                    { id: 'rc_number', label: 'RC Number/Load Number', type: 'text' },
+                    { id: 'load_number', label: 'Load Number', type: 'text' },
+                    { id: 'dispatcher', label: 'Dispatcher', type: 'text' },
+                    { id: 'broker_shipper', label: 'Broker/Shipper', type: 'text' },
+                    { id: 'pickup_address', label: 'Pickup', type: 'text' },
+                    { id: 'dropoff_address', label: 'Dropoff', type: 'text' },
+                    { id: 'miles', label: 'Miles', type: 'number' },
+                    { id: 'dh_miles', label: 'DH Miles', type: 'number' },
+                    { id: 'total_miles', label: 'Total Miles', type: 'number' },
+                    { id: 'amount', label: 'Amount RC $', type: 'number' },
+                    { id: 'quickpay_percentage', label: 'Quick Pay %', type: 'number' },
+                    { id: 'amount_received', label: 'Amount Received $', type: 'number' }
+                ],
+                rlp: [
+                    { id: 'rlp_number', label: 'RLP #', type: 'text' },
+                    { id: 'date_received', label: 'Date Received', type: 'date' },
+                    { id: 'invoice_number', label: 'Invoice #', type: 'text' },
+                    { id: 'rc_number', label: 'RC Number/Load Number', type: 'text' },
+                    { id: 'load_number', label: 'Load Number', type: 'text' },
+                    { id: 'dispatcher', label: 'Dispatcher', type: 'text' },
+                    { id: 'broker_shipper', label: 'Broker/Shipper', type: 'text' },
+                    { id: 'total_miles', label: 'Total Miles', type: 'number' },
+                    { id: 'amount', label: 'Amount RC $', type: 'number' },
+                    { id: 'quickpay_percentage', label: 'Quick Pay %', type: 'number' },
+                    { id: 'amount_received', label: 'Amount Received $', type: 'number' }
+                ]
+            };
 
-        // Check authentication
-        function checkAuth() {
-            const savedUser = localStorage.getItem('tdems_current_user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showDashboard();
-            } else {
+            // ---------- HELPERS ----------
+            function saveUsers() { localStorage.setItem('tdems_users', JSON.stringify(users)); }
+            function saveExpenses() { 
+                localStorage.setItem('tdems_expenses', JSON.stringify(expenses));
+                console.log('Expenses saved:', expenses.length); // Debug log
+            }
+
+            // ---------- AUTH ----------
+            function checkAuth() {
+                const saved = localStorage.getItem('tdems_current_user');
+                if (saved) { currentUser = JSON.parse(saved); showDashboard(); } else showLogin();
+            }
+
+            function showLogin() {
+                document.getElementById('app').innerHTML = `
+                    <div class="flex items-center justify-center min-h-[80vh]">
+                        <div class="login-card text-center">
+                            <div class="text-6xl text-primary mb-6 pulse-animation"><i class="fas fa-truck"></i></div>
+                            <h2 class="text-4xl font-black text-black mb-2">Expense Tracker</h2>
+                            <p class="text-gray-500 mb-10">7 Document Types (RC, BOL, POD, Dispatcher, Fuel, Invoice, RLP)</p>
+                            <div><div class="mb-6 text-left"><label>Username</label><input type="text" id="loginUsername" value="admin"></div>
+                            <div class="mb-8 text-left"><label>Password</label><input type="password" id="loginPassword" value="admin123"></div>
+                            <div id="loginError" class="hidden bg-red-500 text-white p-4 rounded-2xl mb-6"></div>
+                            <button class="btn-primary w-full justify-center text-lg" onclick="handleLogin()"><i class="fas fa-sign-in-alt mr-2"></i>Sign In</button></div>
+                            <div class="mt-8 text-sm text-gray-400">admin / admin123</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            window.handleLogin = function() {
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                const user = users.find(u => u.username === username && u.password === password);
+                if (user) {
+                    localStorage.setItem('tdems_current_user', JSON.stringify(user));
+                    currentUser = user;
+                    showDashboard();
+                } else {
+                    const err = document.getElementById('loginError');
+                    err.textContent = 'Invalid credentials';
+                    err.classList.remove('hidden');
+                }
+            };
+
+            window.logout = function() {
+                localStorage.removeItem('tdems_current_user');
+                currentUser = null;
                 showLogin();
-            }
-        }
+            };
 
-        // Show login screen
-        function showLogin() {
-            const app = document.getElementById('app');
-            app.innerHTML = 
-                '<div class="flex items-center justify-center min-h-[80vh]">' +
-                    '<div class="login-card text-center">' +
-                        '<div class="text-6xl text-primary mb-6 pulse-animation">' +
-                            '<i class="fas fa-truck"></i>' +
-                        '</div>' +
-                        '<h2 class="text-4xl font-black text-black mb-2">Expense Tracker</h2>' +
-                        '<p class="text-gray-500 mb-10">Truck Driver Management</p>' +
-                        '<div>' +
-                            '<div class="mb-6 text-left">' +
-                                '<label class="block text-sm font-semibold text-black mb-2 uppercase tracking-wide">Username</label>' +
-                                '<input type="text" id="username" placeholder="Enter username" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-black">' +
-                            '</div>' +
-                            '<div class="mb-8 text-left">' +
-                                '<label class="block text-sm font-semibold text-black mb-2 uppercase tracking-wide">Password</label>' +
-                                '<input type="password" id="password" placeholder="Enter password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-black">' +
-                            '</div>' +
-                            '<div id="loginError" class="hidden bg-red-500 text-white p-4 rounded-2xl mb-6 shake-animation"></div>' +
-                            '<button onclick="handleLogin()" class="btn-primary w-full justify-center text-lg">' +
-                                '<i class="fas fa-sign-in-alt mr-2"></i>Sign In' +
-                            '</button>' +
-                        '</div>' +
-                        '<div class="mt-8 text-sm text-gray-400">Default: admin / admin123</div>' +
-                    '</div>' +
-                '</div>';
-        }
-
-        // Handle login
-        function handleLogin() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('loginError');
-
-            const users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
-            const user = users.find(u => u.username === username && u.password === password);
-
-            if (user) {
-                localStorage.setItem('tdems_current_user', JSON.stringify(user));
-                currentUser = user;
-                showDashboard();
-            } else {
-                errorDiv.textContent = 'Invalid username or password';
-                errorDiv.classList.remove('hidden');
-            }
-        }
-
-        // Logout
-        function logout() {
-            localStorage.removeItem('tdems_current_user');
-            currentUser = null;
-            showLogin();
-        }
-
-        // Load data
-        async function loadData() {
-            try {
-                // Load directly from localStorage
-                users = JSON.parse(localStorage.getItem('tdems_users') || '[]');
-                expenses = JSON.parse(localStorage.getItem('tdems_expenses') || '[]');
-                tags = JSON.parse(localStorage.getItem('tdems_tags') || '[]');
-                
-                console.log('Loaded from localStorage:');
-                console.log('Users:', users.length);
-                console.log('Expenses:', expenses.length);
-                console.log('Tags:', tags.length);
-            } catch (error) {
-                console.error('Error loading data:', error);
-                users = [];
-                expenses = [];
-                tags = [];
-            }
-        }
-
-        // Show dashboard
-        async function showDashboard() {
-            await loadData();
-            const app = document.getElementById('app');
-            const isAdmin = currentUser?.role === 'admin';
-            
-            app.innerHTML = `
-                <div class="dashboard-card">
-                    <!-- header -->
-                    <div class="flex justify-between items-center px-10 py-6 border-b border-gray-200 bg-white/90">
-                        <h1 class="text-3xl font-black text-black tracking-tight">💰 Expense Management</h1>
-                        <div class="flex items-center gap-6">
-                            <span class="text-gray-600 font-medium">${currentUser.name} (${currentUser.role})</span>
-                            ${isAdmin ? '<button class="btn-primary text-sm py-2 px-5" onclick="handleExportPDF()"><i class="fas fa-file-pdf mr-2"></i>Export PDF</button>' : ''}
-                            <button class="btn-danger text-sm py-2 px-5" onclick="logout()">Logout</button>
-                        </div>
-                    </div>
-                    ${isAdmin ? `
-                    <!-- tabs -->
-                    <div class="flex gap-1 px-10 pt-4 bg-gray-50/80">
-                        <div class="tab-btn active" onclick="showTab('expenses')">Expenses</div>
-                        <div class="tab-btn" onclick="showTab('users')">User Management</div>
-                        <div class="tab-btn" onclick="showTab('tags')">Tag Management</div>
-                    </div>
-                    ` : ''}
-                    <!-- content area -->
-                    <div class="p-10 bg-white/95">
-                        <!-- total + search bar -->
-                        <div class="total-badge" id="totalDisplay">Total: $0.00</div>
-                        <div class="flex flex-wrap items-center gap-4 mb-8">
-                            <input type="text" id="searchInput" placeholder="Search expenses, driver..." class="flex-1 min-w-[240px]" oninput="renderExpenses()">
-                            <button class="btn-primary" onclick="showExpenseForm()"><i class="fas fa-plus"></i> Add Expense</button>
-                        </div>
-                        <!-- filter tags -->
-                        <div class="flex flex-wrap gap-3 mb-10" id="filterTags"></div>
-
-                        <!-- dynamic tab contents -->
-                        <div id="expensesTab" class="tab-content block">
-                            <div id="expenseForm" class="hidden bg-gray-50 p-8 rounded-3xl border border-gray-200 mb-10">
-                                <h3 class="text-2xl font-bold text-black mb-6">➕ Add Expense</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div><label>Title *</label><input type="text" id="expenseTitle" placeholder="e.g. Fuel"></div>
-                                    <div><label>Amount ($) *</label><input type="number" id="expenseAmount" placeholder="0.00"></div>
-                                    ${isAdmin ? `<div><label>Driver</label><select id="expenseDriver"><option value="">Select driver</option></select></div>` : ''}
-                                    <div><label>Tags (multi)</label><select id="expenseTags" multiple class="h-32"></select></div>
-                                </div>
-                                <div class="mt-6"><label>Description</label><textarea id="expenseDescription" rows="3"></textarea></div>
-                                <div class="mt-6">
-                                    <label>Receipt / file</label>
-                                    <div class="file-drop" id="fileUpload" onclick="document.getElementById('expenseFile').click()">
-                                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
-                                        <p class="text-gray-500">Click or drag to upload</p>
-                                        <div class="text-sm text-gray-400 mt-2" id="fileInfo"></div>
+            // ---------- DASHBOARD ----------
+            async function showDashboard() {
+                loadFromStorage();
+                const isAdmin = currentUser?.role === 'admin';
+                const app = document.getElementById('app');
+                app.innerHTML = `
+                    <div class="dashboard-card">
+                        <div class="flex justify-between items-center px-10 py-6 border-b border-gray-200 bg-white/90">
+                            <h1 class="text-3xl font-black text-black tracking-tight">Truck DMS</h1>
+                            <div class="flex items-center gap-6">
+                                <span class="text-gray-600 font-medium">${currentUser.name} (${currentUser.role})</span>
+                                ${isAdmin ? `
+                                    <div class="flex gap-2">
+                                        <select id="pdfTagSelect" class="py-2 px-3 rounded-full border-2 border-gray-200">
+                                            <option value="">All Types (mixed fields)</option>
+                                            ${tags.map(t => `<option value="${t.id}">${t.name} (all fields)</option>`).join('')}
+                                        </select>
+                                        <button class="btn-primary text-sm py-2 px-5" onclick="previewPDF()">
+                                            <i class="fas fa-eye mr-2"></i>Preview PDF
+                                        </button>
+                                        <button class="btn-primary text-sm py-2 px-5" onclick="handleExportPDF()">
+                                            <i class="fas fa-file-pdf mr-2"></i>Export PDF
+                                        </button>
                                     </div>
-                                    <input type="file" id="expenseFile" class="hidden" onchange="handleFileSelect(event)">
-                                    <input type="text" id="documentName" placeholder="Document name (optional)" class="mt-4">
-                                </div>
-                                <div class="flex gap-4 mt-8">
-                                    <button class="btn-primary" onclick="saveExpense()">Save Expense</button>
-                                    <button class="btn-secondary" onclick="hideExpenseForm()">Cancel</button>
-                                </div>
+                                ` : ''}
+                                <button class="btn-danger text-sm py-2 px-5" onclick="logout()">Logout</button>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="expensesGrid"></div>
                         </div>
-
-                        <div id="usersTab" class="tab-content hidden">
-                            <div class="bg-gray-50 p-8 rounded-3xl border border-gray-200 mb-10">
-                                <h3 class="text-2xl font-bold mb-6">👤 Add User</h3>
-                                <div class="grid md:grid-cols-2 gap-6">
-                                    <div><label>Username</label><input type="text" id="newUsername"></div>
-                                    <div><label>Password</label><input type="password" id="newPassword"></div>
-                                    <div><label>Full Name</label><input type="text" id="newFullName"></div>
-                                    <div><label>Role</label><select id="newRole"><option value="driver">Driver</option><option value="admin">Admin</option></select></div>
-                                </div>
-                                <button class="btn-primary mt-8" onclick="addUser()"><i class="fas fa-user-plus"></i> Add User</button>
-                            </div>
-                            <div id="editUserForm" class="hidden bg-blue-50 p-8 rounded-3xl border border-blue-200 mb-10">
-                                <h3 class="text-2xl font-bold mb-6">✏️ Edit User</h3>
-                                <div class="grid md:grid-cols-2 gap-6">
-                                    <div><label>Username</label><input type="text" id="editUsername"></div>
-                                    <div><label>Password (blank = keep)</label><input type="password" id="editPassword"></div>
-                                    <div><label>Full Name</label><input type="text" id="editFullName"></div>
-                                    <div><label>Role</label><select id="editRole"><option value="driver">Driver</option><option value="admin">Admin</option></select></div>
-                                </div>
-                                <div class="flex gap-4 mt-8">
-                                    <button class="btn-primary" onclick="updateUser()">Update</button>
-                                    <button class="btn-secondary" onclick="cancelEditUser()">Cancel</button>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="usersGrid"></div>
+                        ${isAdmin ? `
+                        <div class="flex gap-1 px-10 pt-4 bg-gray-50/80">
+                            <div class="tab-btn active" onclick="showTab('expenses')">Expenses</div>
+                            <div class="tab-btn" onclick="showTab('users')">User Management</div>
                         </div>
-
-                        <div id="tagsTab" class="tab-content hidden">
-                            <div class="bg-gray-50 p-8 rounded-3xl border border-gray-200 mb-10">
-                                <h3 class="text-2xl font-bold mb-6">🏷️ Add Tag</h3>
-                                <div class="grid md:grid-cols-2 gap-6">
-                                    <div><label>Tag Name</label><input type="text" id="newTagName"></div>
-                                    <div><label>Color</label><div class="flex flex-wrap gap-3" id="colorPicker"></div></div>
-                                </div>
-                                <button class="btn-primary mt-8" onclick="addTag()"><i class="fas fa-tag"></i> Add Tag</button>
+                        ` : ''}
+                        <div class="p-10 bg-white/95">
+                            <div class="total-badge" id="totalDisplay">Total: $0.00</div>
+                            <div class="flex flex-wrap items-center gap-4 mb-8">
+                                <input type="text" id="searchInput" placeholder="Search expenses, driver..." class="flex-1 min-w-[240px]" onkeyup="renderExpenses()">
+                                <button class="btn-primary" onclick="showExpenseForm()"><i class="fas fa-plus"></i> Add Expense</button>
                             </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="tagsGrid"></div>
+                            <div class="flex flex-wrap gap-3 mb-10" id="filterTags"></div>
+
+                            <!-- expenses tab (main) -->
+                            <div id="expensesTab" class="tab-content block">
+                                <div id="expenseForm" class="hidden bg-gray-50 p-8 rounded-3xl border border-gray-200 mb-10">
+                                    <h3 class="text-2xl font-bold text-black mb-6">➕ Add Expense (choose document type)</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div><label>Title *</label><input type="text" id="expenseTitle" placeholder="e.g. Trip 101"></div>
+                                        <div><label>Amount ($) *</label><input type="number" id="expenseAmount" placeholder="0.00"></div>
+                                        ${isAdmin ? `<div><label>Driver</label><select id="expenseDriver"><option value="">Select driver</option></select></div>` : ''}
+                                        <div><label>Document Type *</label><select id="documentType" onchange="renderDocumentFields()"><option value="">Select document type</option></select></div>
+                                    </div>
+                                    <div class="mt-6"><label>Description</label><textarea id="expenseDescription" rows="3"></textarea></div>
+                                    <div id="documentFieldsContainer" class="mt-6"></div>
+                                    <div class="mt-6">
+                                        <label>Receipt / file</label>
+                                        <div class="file-drop" id="fileUpload" onclick="document.getElementById('expenseFile').click()">
+                                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                                            <p class="text-gray-500">Click or drag to upload</p>
+                                            <div class="text-sm text-gray-400 mt-2" id="fileInfo"></div>
+                                        </div>
+                                        <input type="file" id="expenseFile" class="hidden" onchange="handleFileSelect(event)">
+                                    </div>
+                                    <div class="flex gap-4 mt-8">
+                                        <button class="btn-primary" onclick="saveExpense()">Save Expense</button>
+                                        <button class="btn-secondary" onclick="hideExpenseForm()">Cancel</button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="expensesGrid"></div>
+                            </div>
+
+                            <!-- users tab (admin only) -->
+                            <div id="usersTab" class="tab-content hidden">
+                                <div class="bg-gray-50 p-8 rounded-3xl border border-gray-200 mb-10">
+                                    <h3 class="text-2xl font-bold mb-6">👤 Add User</h3>
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <div><label>Username</label><input type="text" id="newUsername"></div>
+                                        <div><label>Password</label><input type="password" id="newPassword"></div>
+                                        <div><label>Full Name</label><input type="text" id="newFullName"></div>
+                                        <div><label>Role</label><select id="newRole"><option value="driver">Driver</option><option value="admin">Admin</option></select></div>
+                                    </div>
+                                    <button class="btn-primary mt-8" onclick="addUser()"><i class="fas fa-user-plus"></i> Add User</button>
+                                </div>
+                                <div id="editUserForm" class="hidden bg-blue-50 p-8 rounded-3xl border border-blue-200 mb-10">
+                                    <h3 class="text-2xl font-bold mb-6">✏️ Edit User</h3>
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <div><label>Username</label><input type="text" id="editUsername"></div>
+                                        <div><label>Password (blank = keep)</label><input type="password" id="editPassword"></div>
+                                        <div><label>Full Name</label><input type="text" id="editFullName"></div>
+                                        <div><label>Role</label><select id="editRole"><option value="driver">Driver</option><option value="admin">Admin</option></select></div>
+                                    </div>
+                                    <div class="flex gap-4 mt-8">
+                                        <button class="btn-primary" onclick="updateUser()">Update</button>
+                                        <button class="btn-secondary" onclick="cancelEditUser()">Cancel</button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="usersGrid"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            
-            if (isAdmin) { 
-                renderColorPicker(); 
-                renderUsers(); 
-                renderTagsGrid(); 
+                `;
+                // Populate document type dropdown from fixed tags
+                const typeSel = document.getElementById('documentType');
+                if (typeSel) {
+                    typeSel.innerHTML = '<option value="">Select document type</option>';
+                    tags.forEach(t => typeSel.innerHTML += `<option value="${t.id}">${t.name}</option>`);
+                }
+                if (isAdmin) {
+                    const driverSel = document.getElementById('expenseDriver');
+                    if (driverSel) {
+                        driverSel.innerHTML = '<option value="">Select driver</option>';
+                        users.filter(u => u.role === 'driver').forEach(d => {
+                            driverSel.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+                        });
+                    }
+                    renderUsersGrid();
+                }
+                renderFilterTags();
+                renderExpenses();
             }
-            renderTags();
-            renderExpenses();
-            populateTagsDropdown();
-            
-            // Populate driver dropdown for admin
-            if (isAdmin) {
-                const sel = document.getElementById('expenseDriver');
-                if (sel) {
-                    sel.innerHTML = '<option value="">Select driver</option>';
-                    users.filter(u => u.role === 'driver').forEach(d => {
-                        sel.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+
+            window.showTab = function(tab) {
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                document.getElementById(tab + 'Tab').classList.remove('hidden');
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            };
+
+            window.renderDocumentFields = function() {
+                const type = document.getElementById('documentType')?.value;
+                const container = document.getElementById('documentFieldsContainer');
+                if (!container || !type) { container.innerHTML = ''; return; }
+                const tag = tags.find(t => t.id === type);
+                const fields = documentTypeFields[type] || [];
+                let html = `<fieldset class="border-2 border-gray-200 rounded-2xl p-6 mb-6">
+                    <legend class="text-lg font-bold text-gray-700 px-4" style="background: ${tag?.color}20; color: ${tag?.color}; border: 1px solid ${tag?.color}40; border-radius: 1rem;">
+                        <i class="fas ${tag?.icon} mr-2"></i>${tag?.name} Fields
+                    </legend><div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+                fields.forEach(f => {
+                    html += `<div><label>${f.label}</label><input type="${f.type}" id="field_${f.id}" placeholder="${f.label}" class="w-full"></div>`;
+                });
+                html += '</div></fieldset>';
+                container.innerHTML = html;
+            };
+
+            window.showExpenseForm = function() {
+                document.getElementById('expenseForm').classList.remove('hidden');
+                const typeSel = document.getElementById('documentType');
+                if (typeSel && typeSel.options.length === 1) {
+                    typeSel.innerHTML = '<option value="">Select document type</option>';
+                    tags.forEach(t => typeSel.innerHTML += `<option value="${t.id}">${t.name}</option>`);
+                }
+            };
+            window.hideExpenseForm = function() { 
+                document.getElementById('expenseForm').classList.add('hidden'); 
+                uploadedFile = null;
+                document.getElementById('fileInfo').innerHTML = '';
+            };
+            window.handleFileSelect = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                uploadedFile = file;
+                document.getElementById('fileInfo').innerHTML = `<span class="text-green-600">${file.name} (${(file.size/1024).toFixed(1)} KB)</span>`;
+            };
+
+            function fileToBase64(file, cb) { const r = new FileReader(); r.onload = () => cb(r.result); r.readAsDataURL(file); }
+
+            window.saveExpense = function() {
+                console.log('saveExpense called'); // Debug log
+                
+                const title = document.getElementById('expenseTitle')?.value;
+                const amount = parseFloat(document.getElementById('expenseAmount')?.value);
+                const desc = document.getElementById('expenseDescription')?.value;
+                const docType = document.getElementById('documentType')?.value;
+                
+                console.log('Form values:', { title, amount, desc, docType }); // Debug log
+                
+                if (!title || !amount || !docType) {
+                    alert('Title, amount & document type required');
+                    return;
+                }
+                
+                let fieldVals = {};
+                if (documentTypeFields[docType]) {
+                    documentTypeFields[docType].forEach(f => {
+                        const inp = document.getElementById(`field_${f.id}`);
+                        if (inp && inp.value) fieldVals[f.id] = inp.value;
                     });
                 }
-            }
-        }
-
-        function showTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tab + 'Tab').classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        function renderTags() {
-            const container = document.getElementById('filterTags');
-            if (!container) return;
-            container.innerHTML = '';
-            tags.forEach(t => {
-                const btn = document.createElement('button');
-                btn.className = `filter-tag ${selectedFilterTags.includes(t.id) ? 'active' : ''}`;
-                btn.style.backgroundColor = selectedFilterTags.includes(t.id) ? t.color : '';
-                btn.style.borderColor = selectedFilterTags.includes(t.id) ? t.color : '#e2e8f0';
-                btn.textContent = t.name;
-                btn.onclick = () => toggleFilterTag(t.id);
-                container.appendChild(btn);
-            });
-        }
-
-        function toggleFilterTag(id) {
-            const idx = selectedFilterTags.indexOf(id);
-            idx === -1 ? selectedFilterTags.push(id) : selectedFilterTags.splice(idx, 1);
-            renderTags();
-            renderExpenses();
-        }
-
-        function showExpenseForm() {
-            document.getElementById('expenseForm').classList.remove('hidden');
-            populateTagsDropdown();
-        }
-
-        function hideExpenseForm() { 
-            document.getElementById('expenseForm').classList.add('hidden'); 
-            uploadedFile = null; 
-            document.getElementById('fileInfo').innerHTML = '';
-        }
-
-        function populateTagsDropdown() {
-            const sel = document.getElementById('expenseTags');
-            if (!sel) return;
-            sel.innerHTML = '';
-            tags.forEach(t => sel.innerHTML += `<option value="${t.id}">${t.name}</option>`);
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            uploadedFile = file;
-            document.getElementById('fileInfo').innerHTML = `<span class="text-green-600">${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>`;
-        }
-
-        function fileToBase64(file, cb) { 
-            const r = new FileReader(); 
-            r.onload = () => cb(r.result); 
-            r.readAsDataURL(file); 
-        }
-
-        async function saveExpense() {
-            const title = document.getElementById('expenseTitle').value;
-            const amount = parseFloat(document.getElementById('expenseAmount').value);
-            const desc = document.getElementById('expenseDescription').value;
-            const docName = document.getElementById('documentName').value;
-            
-            if (!title || !amount) return alert('Title & amount required');
-            
-            const tagSelect = document.getElementById('expenseTags');
-            const selected = Array.from(tagSelect.selectedOptions).map(o => o.value);
-            
-            let driverId = currentUser.id, driverName = currentUser.name, driverUsername = currentUser.username;
-            
-            if (currentUser.role === 'admin') {
-                const dSel = document.getElementById('expenseDriver');
-                if (dSel && dSel.value) {
-                    const d = users.find(u => u.id === dSel.value);
-                    if (d) { driverId = d.id; driverName = d.name; driverUsername = d.username; }
+                
+                let driverId = currentUser.id, driverName = currentUser.name, driverUsername = currentUser.username;
+                if (currentUser.role === 'admin') {
+                    const ds = document.getElementById('expenseDriver');
+                    if (ds && ds.value) {
+                        const d = users.find(u => u.id === ds.value);
+                        if (d) { driverId = d.id; driverName = d.name; driverUsername = d.username; }
+                    }
                 }
-            }
-            
-            const expense = { 
-                id: 'exp-' + Date.now(), 
-                title, 
-                amount, 
-                description: desc, 
-                tags: selected, 
-                driverId, 
-                driverName, 
-                driverUsername, 
-                date: new Date().toISOString().slice(0, 10) 
+                
+                const newExp = {
+                    id: 'exp-' + Date.now(),
+                    title: title,
+                    amount: amount,
+                    description: desc || '',
+                    document_type: docType,
+                    driver_id: driverId,
+                    driver_name: driverName,
+                    driver_username: driverUsername,
+                    created_at: new Date().toISOString(),
+                    ...fieldVals
+                };
+                
+                console.log('New expense object:', newExp); // Debug log
+                
+                if (uploadedFile) {
+                    fileToBase64(uploadedFile, (b64) => {
+                        newExp.receipt_url = { name: uploadedFile.name, type: uploadedFile.type, data: b64 };
+                        expenses.push(newExp);
+                        saveExpenses();
+                        hideExpenseForm();
+                        renderExpenses();
+                        alert('Expense saved successfully!');
+                    });
+                } else {
+                    expenses.push(newExp);
+                    saveExpenses();
+                    hideExpenseForm();
+                    renderExpenses();
+                    alert('Expense saved successfully!');
+                }
             };
-            
-            if (uploadedFile) {
-                fileToBase64(uploadedFile, async (b64) => {
-                    expense.file = { 
-                        name: uploadedFile.name, 
-                        displayName: docName || uploadedFile.name, 
-                        type: uploadedFile.type, 
-                        data: b64 
+
+            function renderFilterTags() {
+                const cont = document.getElementById('filterTags');
+                if (!cont) return;
+                cont.innerHTML = '';
+                tags.forEach(t => {
+                    const btn = document.createElement('button');
+                    btn.className = `filter-tag ${selectedFilterTags.includes(t.id) ? 'active' : ''}`;
+                    btn.style.backgroundColor = selectedFilterTags.includes(t.id) ? t.color : '';
+                    btn.style.borderColor = selectedFilterTags.includes(t.id) ? t.color : '#e2e8f0';
+                    btn.textContent = t.name;
+                    btn.onclick = () => {
+                        const idx = selectedFilterTags.indexOf(t.id);
+                        idx === -1 ? selectedFilterTags.push(t.id) : selectedFilterTags.splice(idx, 1);
+                        renderFilterTags();
+                        renderExpenses();
                     };
-                    await finalSave(expense);
+                    cont.appendChild(btn);
                 });
-            } else await finalSave(expense);
-        }
-
-        async function finalSave(exp) {
-            const r = await db.executeQuery('INSERT INTO expenses (title, amount, description, tags, driverId, driverName, driverUsername, date, file) VALUES (?,?,?,?,?,?,?,?,?)',
-                [exp.title, exp.amount, exp.description, JSON.stringify(exp.tags), exp.driverId, exp.driverName, exp.driverUsername, exp.date, exp.file ? JSON.stringify(exp.file) : null]);
-            if (r.success) { 
-                expenses.push(exp); 
-                hideExpenseForm(); 
-                renderExpenses(); 
             }
-        }
 
-        function deleteExpense(id) { 
-            if (confirm('Delete expense?')) { 
-                expenses = expenses.filter(e => e.id !== id); 
-                localStorage.setItem('tdems_expenses', JSON.stringify(expenses)); 
-                renderExpenses(); 
-            } 
-        }
-
-        function renderExpenses() {
-            const grid = document.getElementById('expensesGrid');
-            if (!grid) return;
-            
-            const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
-            let filtered = expenses.filter(e => 
-                (e.title.toLowerCase().includes(search) || 
-                 e.description.toLowerCase().includes(search) || 
-                 e.driverName.toLowerCase().includes(search)) && 
-                (currentUser.role === 'admin' || e.driverId === currentUser.id)
-            );
-            
-            if (selectedFilterTags.length) {
-                filtered = filtered.filter(e => e.tags?.some(t => selectedFilterTags.includes(t)));
-            }
-            
-            const total = filtered.reduce((s, e) => s + e.amount, 0);
-            const totalEl = document.getElementById('totalDisplay');
-            if (totalEl) totalEl.innerText = `Total: $${total.toFixed(2)}`;
-            
-            if (!filtered.length) { 
-                grid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-400 text-lg">No expenses yet</div>'; 
-                return; 
-            }
-            
-            grid.innerHTML = filtered.map(e => {
-                const tagChips = (e.tags || []).map(tid => { 
-                    const t = tags.find(tt => tt.id === tid); 
-                    return t ? `<span class="tag-chip" style="background:${t.color}20; color:${t.color}; border:1px solid ${t.color}40">${t.name}</span>` : ''; 
-                }).join(' ');
+            // View expense summary modal
+            window.viewExpenseSummary = function(expense) {
+                const tag = tags.find(t => t.id === expense.document_type) || { name: expense.document_type, color: '#10b981', icon: 'fa-file' };
                 
-                const fileHtml = e.file ? `<div class="flex items-center gap-3 mt-4"><i class="fas fa-paperclip text-cyan-600"></i><span class="text-sm">${e.file.displayName || e.file.name}</span><button class="bg-cyan-500 text-white px-4 py-1 rounded-full text-xs" onclick='viewFile("${e.file.data}")'>View</button></div>` : '';
+                // Get all fields for this expense based on type
+                const fields = documentTypeFields[expense.document_type] || [];
                 
-                return `<div class="expense-card">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold text-black">${e.title}</h3>
-                        <span class="text-2xl font-extrabold text-green-600">$${e.amount.toFixed(2)}</span>
+                let summaryHtml = `
+                    <div class="modal" onclick="if(event.target === this) this.remove()">
+                        <div class="modal-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold" style="color: ${tag.color}">
+                                    <i class="fas ${tag.icon} mr-2"></i>${expense.title} - ${tag.name} Summary
+                                </h2>
+                                <button class="text-gray-500 hover:text-gray-700 text-2xl" onclick="this.closest('.modal').remove()">&times;</button>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-xl mb-6">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div class="text-xs uppercase text-gray-500">Driver</div>
+                                        <div class="font-semibold">${expense.driver_name}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs uppercase text-gray-500">Date</div>
+                                        <div class="font-semibold">${new Date(expense.created_at).toLocaleString()}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs uppercase text-gray-500">Description</div>
+                                        <div class="font-semibold">${expense.description || 'No description'}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs uppercase text-gray-500">Amount</div>
+                                        <div class="font-semibold text-green-600">$${parseFloat(expense.amount || 0).toFixed(2)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-lg font-bold mb-4">All Fields</h3>
+                            <div class="summary-grid">
+                `;
+                
+                // Add all fields dynamically
+                fields.forEach(field => {
+                    const value = expense[field.id];
+                    if (value && value !== '') {
+                        summaryHtml += `
+                            <div class="summary-item">
+                                <div class="summary-label">${field.label}</div>
+                                <div class="summary-value">${field.type === 'number' && !isNaN(value) ? (field.label.includes('$') ? '$' + value : value) : value}</div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                // Add receipt if exists
+                if (expense.receipt_url) {
+                    summaryHtml += `
+                        <div class="summary-item col-span-2">
+                            <div class="summary-label">Receipt</div>
+                            <div class="summary-value">
+                                <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                                ${expense.receipt_url.name}
+                                <button class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs ml-3" onclick="window.open('${expense.receipt_url.data}')">View</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                summaryHtml += `
+                            </div>
+                            <div class="flex justify-end mt-6">
+                                <button class="btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-gray-600 mb-4">${e.description}</p>
-                    <div class="flex flex-wrap gap-2 mb-4">${tagChips}</div>
-                    ${fileHtml}
-                    <div class="text-sm text-gray-400 mb-5">${e.driverName} · ${new Date(e.date).toLocaleDateString()}</div>
-                    <div><button class="btn-danger text-sm py-2 px-5" onclick="deleteExpense('${e.id}')">Delete</button></div>
-                </div>`;
-            }).join('');
-        }
-
-        function renderUsers() {
-            const g = document.getElementById('usersGrid'); 
-            if (!g) return;
-            g.innerHTML = users.map(u => `<div class="grid-card">
-                <h4 class="font-bold text-lg">${u.name}</h4>
-                <p class="text-sm text-gray-500">@${u.username} · ${u.role}</p>
-                <div class="flex gap-3 mt-5">
-                    <button class="bg-blue-500 text-white px-5 py-2 rounded-full text-sm" onclick="editUser('${u.id}')">Edit</button>
-                    ${u.username !== 'admin' ? `<button class="bg-red-500 text-white px-5 py-2 rounded-full text-sm" onclick="deleteUser('${u.id}')">Delete</button>` : ''}
-                </div>
-            </div>`).join('');
-        }
-
-        function deleteUser(id) { 
-            if (confirm('Delete user?')) { 
-                users = users.filter(u => u.id !== id); 
-                localStorage.setItem('tdems_users', JSON.stringify(users)); 
-                renderUsers(); 
-            } 
-        }
-
-        function editUser(id) { 
-            const u = users.find(x => x.id === id); 
-            if (!u) return; 
-            editingUserId = id; 
-            document.getElementById('editUsername').value = u.username; 
-            document.getElementById('editFullName').value = u.name; 
-            document.getElementById('editRole').value = u.role; 
-            document.getElementById('editUserForm').classList.remove('hidden'); 
-        }
-        
-        function cancelEditUser() { 
-            document.getElementById('editUserForm').classList.add('hidden'); 
-            editingUserId = null; 
-        }
-        
-        function updateUser() { 
-            const u = users.find(x => x.id === editingUserId); 
-            if (!u) return; 
-            u.username = document.getElementById('editUsername').value; 
-            u.name = document.getElementById('editFullName').value; 
-            u.role = document.getElementById('editRole').value; 
-            const pw = document.getElementById('editPassword').value; 
-            if (pw) u.password = pw; 
-            localStorage.setItem('tdems_users', JSON.stringify(users)); 
-            cancelEditUser(); 
-            renderUsers(); 
-        }
-
-        async function addUser() {
-            const username = document.getElementById('newUsername').value;
-            const pw = document.getElementById('newPassword').value;
-            const name = document.getElementById('newFullName').value;
-            const role = document.getElementById('newRole').value;
-            
-            if (!username || !pw || !name) return alert('All fields required');
-            
-            const r = await db.executeQuery('INSERT INTO users (username, password, role, name) VALUES (?,?,?,?)', [username, pw, role, name]);
-            if (r.success) { 
-                users.push({ id: r.insertId, username, password: pw, role, name }); 
-                renderUsers(); 
-                document.getElementById('newUsername').value = ''; 
-                document.getElementById('newPassword').value = ''; 
-                document.getElementById('newFullName').value = ''; 
-            }
-        }
-
-        function renderTagsGrid() {
-            const g = document.getElementById('tagsGrid'); 
-            if (!g) return;
-            g.innerHTML = tags.map(t => `<div class="grid-card flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <span class="w-6 h-6 rounded-full" style="background:${t.color}"></span>
-                    <span class="font-medium">${t.name}</span>
-                </div>
-                <button class="text-red-500 hover:text-red-700" onclick="deleteTag('${t.id}')"><i class="fas fa-trash"></i></button>
-            </div>`).join('');
-        }
-
-        function renderColorPicker() {
-            const picker = document.getElementById('colorPicker'); 
-            if (!picker) return;
-            picker.innerHTML = availableColors.map(c => 
-                `<div class="w-10 h-10 rounded-full cursor-pointer border-4 ${c === selectedTagColor ? 'border-primary scale-110' : 'border-transparent'}" 
-                      style="background:${c}" onclick="selectedTagColor='${c}'; renderColorPicker()"></div>`
-            ).join('');
-        }
-
-        function addTag() {
-            const name = document.getElementById('newTagName').value;
-            if (!name) return alert('enter tag name');
-            if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) return alert('exists');
-            const newTag = { id: 'tag-' + Date.now(), name, color: selectedTagColor };
-            tags.push(newTag); 
-            localStorage.setItem('tdems_tags', JSON.stringify(tags)); 
-            renderTagsGrid(); 
-            renderTags(); 
-            document.getElementById('newTagName').value = '';
-        }
-
-        function deleteTag(id) { 
-            if (confirm('Delete tag?')) { 
-                tags = tags.filter(t => t.id !== id); 
-                localStorage.setItem('tdems_tags', JSON.stringify(tags)); 
-                renderTagsGrid(); 
-                renderTags(); 
-            } 
-        }
-
-        function handleExportPDF() {
-            console.log('Export PDF button clicked');
-            console.log('Current user role:', currentUser?.role);
-            
-            if (currentUser?.role !== 'admin') {
-                alert('Only admins can export expenses');
-                return;
-            }
-
-            // Load latest data before export
-            loadData().then(() => {
-                console.log('Data loaded, expenses count:', expenses.length);
-                console.log('Tags available:', tags.length);
+                `;
                 
-                if (!expenses.length) {
-                    alert('No expenses to export');
+                document.body.insertAdjacentHTML('beforeend', summaryHtml);
+            };
+
+            window.renderExpenses = function() {
+                const grid = document.getElementById('expensesGrid');
+                if (!grid) return;
+                
+                console.log('Rendering expenses, count:', expenses.length); // Debug log
+                
+                const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+                let filtered = expenses.filter(e => 
+                    (e.title?.toLowerCase().includes(search) || 
+                     (e.description && e.description.toLowerCase().includes(search)) || 
+                     e.driver_name?.toLowerCase().includes(search)) &&
+                    (currentUser.role === 'admin' || e.driver_id === currentUser.id)
+                );
+                
+                if (selectedFilterTags.length) {
+                    filtered = filtered.filter(e => selectedFilterTags.includes(e.document_type));
+                }
+                
+                const total = filtered.reduce((s,e) => s + (parseFloat(e.amount) || 0), 0);
+                const totalEl = document.getElementById('totalDisplay');
+                if (totalEl) totalEl.innerText = `Total: $${total.toFixed(2)}`;
+
+                if (!filtered.length) { 
+                    grid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-400 text-lg">No expenses yet. Click "Add Expense" to create one.</div>'; 
+                    return; 
+                }
+
+                grid.innerHTML = filtered.map(e => {
+                    const tag = tags.find(t => t.id === e.document_type) || { color: '#aaa', icon: 'fa-file', name: e.document_type };
+                    const tagChip = `<span class="tag-chip" style="background:${tag.color}20; color:${tag.color}; border:1px solid ${tag.color}40"><i class="fas ${tag.icon} mr-1"></i>${tag.name}</span>`;
+                    const fileHtml = e.receipt_url ? `<div class="flex items-center gap-2 mt-2 text-xs"><i class="fas fa-paperclip text-cyan-600"></i><span>${e.receipt_url.name}</span></div>` : '';
+                    
+                    // Show key fields based on type
+                    let details = '';
+                    if (e.document_type === 'rc') details = `<div class="text-xs">Load: ${e.load_number || ''} · $${parseFloat(e.amount || 0).toFixed(2)}</div>`;
+                    else if (e.document_type === 'bol') details = `<div class="text-xs">BOL: ${e.bol_number || ''} · RC: ${e.rc_number || ''}</div>`;
+                    else if (e.document_type === 'pod') details = `<div class="text-xs">RC: ${e.rc_number || ''} · Miles: ${e.miles || ''}</div>`;
+                    else if (e.document_type === 'dispatcher') details = `<div class="text-xs">${e.dispatcher_company || ''} · $${parseFloat(e.dispatcher_amount || 0).toFixed(2)}</div>`;
+                    else if (e.document_type === 'fuel') details = `<div class="text-xs">Receipt #${e.receipt_number || ''} · $${parseFloat(e.amount || 0).toFixed(2)}</div>`;
+                    else if (e.document_type === 'invoice') details = `<div class="text-xs">Inv #${e.invoice_number || ''} · RC $${parseFloat(e.amount || 0).toFixed(2)}</div>`;
+                    else if (e.document_type === 'rlp') details = `<div class="text-xs">RLP #${e.rlp_number || ''} · Rec $${parseFloat(e.amount_received || 0).toFixed(2)}</div>`;
+
+                    return `<div class="expense-card" onclick="viewExpenseSummary(${JSON.stringify(e).replace(/"/g, '&quot;')})">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-lg font-bold text-black">${e.title}</h3>
+                            <span class="text-xl font-extrabold text-green-600">$${parseFloat(e.amount || 0).toFixed(2)}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3">${e.description || ''}</p>
+                        <div class="flex flex-wrap gap-2 mb-3">${tagChip}</div>
+                        <div class="text-gray-700 mb-2">${details}</div>
+                        ${fileHtml}
+                        <div class="flex justify-between items-center mt-3">
+                            <div class="text-xs text-gray-400">${e.driver_name} · ${new Date(e.created_at).toLocaleDateString()}</div>
+                            <button class="btn-danger text-xs py-1 px-3 delete-btn-on-card" onclick="event.stopPropagation(); deleteExpense('${e.id}')">Delete</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            };
+
+            window.deleteExpense = function(id) {
+                event.stopPropagation();
+                if (confirm('Delete expense?')) {
+                    expenses = expenses.filter(e => e.id !== id);
+                    saveExpenses();
+                    renderExpenses();
+                }
+            };
+
+            // ---------- PDF EXPORT WITH ALL FIELDS (EXACTLY AS SPECIFIED) ----------
+            function getFilteredExpensesForPDF() {
+                const tagSelect = document.getElementById('pdfTagSelect');
+                const selectedTag = tagSelect ? tagSelect.value : '';
+                let filtered = [...expenses];
+                if (selectedTag) {
+                    filtered = filtered.filter(e => e.document_type === selectedTag);
+                }
+                return filtered;
+            }
+
+            // Get ALL field labels for a document type (exactly as specified in the template)
+            function getAllFieldLabelsForType(type) {
+                if (!type || type === '') {
+                    // For mixed types, show basic fields
+                    return ['Date', 'Title', 'Driver', 'Amount', 'Type'];
+                }
+                
+                const fieldMap = {
+                    rc: ['Date', 'Load Number', 'Dispatcher', 'Broker/Shipper', 'Pickup Address', 'Pickup Date/Time', 'Dropoff Address', 'Dropoff Date/Time', 'Miles', 'DH Miles', 'Total Miles', 'Rate/Mile', 'Amount $', 'Document Name'],
+                    bol: ['Date', 'BOL #', 'RC Number/Load Number', 'Load Number', 'Dispatcher', 'Broker/Shipper', 'Pickup Address', 'Pickup Date/Time', 'Dropoff Address', 'Dropoff Date/Time', 'Miles', 'DH Miles', 'Document Name'],
+                    pod: ['Date', 'RC Number/Load Number', 'Load Number', 'Dispatcher', 'Broker/Shipper', 'Pickup Address', 'Pickup Date/Time', 'Dropoff Address', 'Dropoff Date/Time', 'Miles', 'Document Name'],
+                    dispatcher: ['Date', 'Dispatcher/Company', 'Phone Number', 'Email', 'RC Number', 'Load Number', 'Broker/Shipper', 'Pickup Address', 'Pickup Date/Time', 'Dropoff Address', 'Dropoff Date/Time', 'RC Amount $', 'Dispatcher %', 'Dispatcher Amount'],
+                    fuel: ['Date', 'Receipt #', 'Receipt Date', 'Amount', 'RC Number', 'Load Number', 'Pickup Address', 'Pickup Date/Time', 'Dropoff Address', 'Dropoff Date/Time', 'RC Amount $'],
+                    invoice: ['Date', 'Invoice #', 'RC Number/Load Number', 'Load Number', 'Dispatcher', 'Broker/Shipper', 'Pickup', 'Dropoff', 'Miles', 'DH Miles', 'Total Miles', 'Amount RC $', 'Quick Pay %', 'Amount Received $'],
+                    rlp: ['Date', 'RLP #', 'Date Received', 'Invoice #', 'RC Number/Load Number', 'Load Number', 'Dispatcher', 'Broker/Shipper', 'Total Miles', 'Amount RC $', 'Quick Pay %', 'Amount Received $']
+                };
+                return fieldMap[type] || ['Date', 'Title', 'Driver', 'Amount'];
+            }
+
+            // Get ALL field values for an expense (exactly as specified)
+            function getAllFieldValuesForExpense(exp) {
+                const type = exp.document_type;
+                const date = new Date(exp.created_at).toLocaleDateString();
+                
+                // For mixed types, return basic fields
+                if (!type) {
+                    return [date, exp.title || '', exp.driver_name || '', `$${parseFloat(exp.amount || 0).toFixed(2)}`, ''];
+                }
+                
+                // Format values for display
+                const formatValue = (val) => {
+                    if (val === null || val === undefined || val === '') return '';
+                    if (typeof val === 'number') return val.toString();
+                    return val;
+                };
+                
+                if (type === 'rc') {
+                    return [date, 
+                            formatValue(exp.load_number), 
+                            formatValue(exp.dispatcher), 
+                            formatValue(exp.broker_shipper), 
+                            formatValue(exp.pickup_address), 
+                            formatValue(exp.pickup_datetime), 
+                            formatValue(exp.dropoff_address), 
+                            formatValue(exp.dropoff_datetime), 
+                            formatValue(exp.miles), 
+                            formatValue(exp.dh_miles), 
+                            formatValue(exp.total_miles), 
+                            formatValue(exp.rate_per_mile), 
+                            `$${parseFloat(exp.amount || 0).toFixed(2)}`, 
+                            formatValue(exp.document_name)];
+                }
+                if (type === 'bol') {
+                    return [date, 
+                            formatValue(exp.bol_number), 
+                            formatValue(exp.rc_number), 
+                            formatValue(exp.load_number), 
+                            formatValue(exp.dispatcher), 
+                            formatValue(exp.broker_shipper), 
+                            formatValue(exp.pickup_address), 
+                            formatValue(exp.pickup_datetime), 
+                            formatValue(exp.dropoff_address), 
+                            formatValue(exp.dropoff_datetime), 
+                            formatValue(exp.miles), 
+                            formatValue(exp.dh_miles), 
+                            formatValue(exp.document_name)];
+                }
+                if (type === 'pod') {
+                    return [date, 
+                            formatValue(exp.rc_number), 
+                            formatValue(exp.load_number), 
+                            formatValue(exp.dispatcher), 
+                            formatValue(exp.broker_shipper), 
+                            formatValue(exp.pickup_address), 
+                            formatValue(exp.pickup_datetime), 
+                            formatValue(exp.dropoff_address), 
+                            formatValue(exp.dropoff_datetime), 
+                            formatValue(exp.miles), 
+                            formatValue(exp.document_name)];
+                }
+                if (type === 'dispatcher') {
+                    return [date, 
+                            formatValue(exp.dispatcher_company), 
+                            formatValue(exp.phone_number), 
+                            formatValue(exp.email), 
+                            formatValue(exp.rc_number), 
+                            formatValue(exp.load_number), 
+                            formatValue(exp.broker_shipper), 
+                            formatValue(exp.pickup_address), 
+                            formatValue(exp.pickup_datetime), 
+                            formatValue(exp.dropoff_address), 
+                            formatValue(exp.dropoff_datetime), 
+                            formatValue(exp.rc_amount), 
+                            formatValue(exp.dispatcher_percentage), 
+                            formatValue(exp.dispatcher_amount)];
+                }
+                if (type === 'fuel') {
+                    return [date, 
+                            formatValue(exp.receipt_number), 
+                            formatValue(exp.receipt_date), 
+                            `$${parseFloat(exp.amount || 0).toFixed(2)}`, 
+                            formatValue(exp.rc_number), 
+                            formatValue(exp.load_number), 
+                            formatValue(exp.pickup_address), 
+                            formatValue(exp.pickup_datetime), 
+                            formatValue(exp.dropoff_address), 
+                            formatValue(exp.dropoff_datetime), 
+                            formatValue(exp.rc_amount)];
+                }
+                if (type === 'invoice') {
+                    return [date, 
+                            formatValue(exp.invoice_number), 
+                            formatValue(exp.rc_number), 
+                            formatValue(exp.load_number), 
+                            formatValue(exp.dispatcher), 
+                            formatValue(exp.broker_shipper), 
+                            formatValue(exp.pickup_address), 
+                            formatValue(exp.dropoff_address), 
+                            formatValue(exp.miles), 
+                            formatValue(exp.dh_miles), 
+                            formatValue(exp.total_miles), 
+                            `$${parseFloat(exp.amount || 0).toFixed(2)}`, 
+                            formatValue(exp.quickpay_percentage), 
+                            `$${parseFloat(exp.amount_received || 0).toFixed(2)}`];
+                }
+                if (type === 'rlp') {
+                    return [date, 
+                            formatValue(exp.rlp_number), 
+                            formatValue(exp.date_received), 
+                            formatValue(exp.invoice_number), 
+                            formatValue(exp.rc_number), 
+                            formatValue(exp.load_number), 
+                            formatValue(exp.dispatcher), 
+                            formatValue(exp.broker_shipper), 
+                            formatValue(exp.total_miles), 
+                            `$${parseFloat(exp.amount || 0).toFixed(2)}`, 
+                            formatValue(exp.quickpay_percentage), 
+                            `$${parseFloat(exp.amount_received || 0).toFixed(2)}`];
+                }
+                
+                return [date, exp.title || '', exp.driver_name || '', `$${parseFloat(exp.amount || 0).toFixed(2)}`, type];
+            }
+
+            window.previewPDF = function() {
+                const filtered = getFilteredExpensesForPDF();
+                const tagSelect = document.getElementById('pdfTagSelect');
+                const selectedTag = tagSelect ? tagSelect.value : '';
+                
+                if (!filtered.length) {
+                    alert('No expenses to preview for selected tag');
                     return;
                 }
 
-                try {
-                    exportToPDF();
-                } catch (error) {
-                    console.error('Error generating PDF:', error);
-                    alert('Error generating PDF: ' + error.message);
-                }
-            });
-        }
+                const headers = getAllFieldLabelsForType(selectedTag);
+                const rows = filtered.map(exp => getAllFieldValuesForExpense(exp));
 
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Add title
-            doc.setFontSize(20);
-            doc.setTextColor(16, 185, 129);
-            doc.text('Expense Report', 14, 22);
-            
-            // Add generation date
-            doc.setFontSize(11);
-            doc.setTextColor(100, 116, 139);
-            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 32);
-            
-            // Add summary
-            const total = expenses.reduce((sum, e) => sum + e.amount, 0);
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`Total Expenses: $${total.toFixed(2)}`, 14, 42);
-            doc.text(`Number of Expenses: ${expenses.length}`, 14, 52);
-            
-            // Prepare table data
-            const tableData = expenses.map(e => {
-                const expenseTags = (e.tags || []).map(tid => {
-                    const tag = tags.find(t => t.id === tid);
-                    return tag ? tag.name : '';
-                }).filter(Boolean).join(', ');
+                // Show preview modal
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content max-w-7xl">
+                        <h2 class="text-2xl font-bold mb-4">PDF Preview - ${selectedTag ? tags.find(t => t.id === selectedTag)?.name + ' (All Fields)' : 'All Types (Basic Fields)'}</h2>
+                        <p class="mb-4">${filtered.length} expense(s) · Total: $${filtered.reduce((s,e) => s + parseFloat(e.amount || 0), 0).toFixed(2)}</p>
+                        <div class="overflow-x-auto max-h-[70vh]">
+                            <table class="preview-table">
+                                <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                                <tbody>
+                                    ${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="flex gap-4 mt-6 justify-end">
+                            <button class="btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                            <button class="btn-primary" onclick="this.closest('.modal').remove(); handleExportPDF(true)">Export PDF</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            };
+
+            window.handleExportPDF = function(fromPreview = false) {
+                if (currentUser?.role !== 'admin') return alert('Admin only');
+                const filtered = getFilteredExpensesForPDF();
+                const tagSelect = document.getElementById('pdfTagSelect');
+                const selectedTag = tagSelect ? tagSelect.value : '';
                 
-                return [
-                    new Date(e.date).toLocaleDateString(),
-                    e.title.substring(0, 30),
-                    e.driverName,
-                    `$${e.amount.toFixed(2)}`,
-                    expenseTags.substring(0, 30)
-                ];
-            });
-            
-            // Add table
-            doc.autoTable({
-                startY: 60,
-                head: [['Date', 'Title', 'Driver', 'Amount', 'Tags']],
-                body: tableData,
-                theme: 'grid',
-                headStyles: {
-                    fillColor: [16, 185, 129],
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold'
-                },
-                alternateRowStyles: {
-                    fillColor: [240, 253, 244]
-                },
-                margin: { top: 60 },
-                styles: {
-                    fontSize: 9,
-                    cellPadding: 3
-                },
-                columnStyles: {
-                    0: { cellWidth: 30 },
-                    1: { cellWidth: 50 },
-                    2: { cellWidth: 40 },
-                    3: { cellWidth: 25 },
-                    4: { cellWidth: 45 }
+                if (!filtered.length) {
+                    alert('No expenses to export for selected tag');
+                    return;
                 }
-            });
-            
-            // Save the PDF
-            doc.save(`expenses_report_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
 
-        function viewFile(data) { 
-            window.open(data); 
-        }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape' });
+                
+                const title = selectedTag ? `${tags.find(t => t.id === selectedTag)?.name} Report (All Fields)` : 'Combined Report (Basic Fields)';
+                doc.setFontSize(16); doc.setTextColor(16,185,129); doc.text(title, 14, 22);
+                doc.setFontSize(9); doc.setTextColor(100,116,139); 
+                doc.text(`Generated: ${new Date().toLocaleDateString()} · ${filtered.length} expenses`, 14, 32);
+                
+                const total = filtered.reduce((s,e) => s + parseFloat(e.amount || 0), 0);
+                doc.text(`Total Amount: $${total.toFixed(2)}`, 14, 40);
 
-        // Initialize when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing app...');
-            try {
-                init();
-            } catch (error) {
-                console.error('Error initializing app:', error);
-                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="bg-white rounded-2xl shadow-2xl p-8 text-center"><div class="text-red-500 text-xl font-bold mb-4">Error initializing app</div><div class="text-gray-600">' + error.message + '</div><button onclick="location.reload()" class="mt-4 btn-primary">Refresh Page</button></div></div>';
+                const headers = getAllFieldLabelsForType(selectedTag);
+                const rows = filtered.map(exp => getAllFieldValuesForExpense(exp));
+
+                doc.autoTable({
+                    startY: 45,
+                    head: [headers],
+                    body: rows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [16,185,129], textColor: [255,255,255], fontStyle: 'bold', fontSize: 7 },
+                    styles: { fontSize: 6, cellPadding: 1.5, overflow: 'linebreak' },
+                    margin: { top: 45 },
+                    columnStyles: { 0: { cellWidth: 20 } } // date column fixed width
+                });
+
+                const filename = selectedTag ? `${selectedTag}_all_fields_${new Date().toISOString().slice(0,10)}.pdf` : `all_types_basic_${new Date().toISOString().slice(0,10)}.pdf`;
+                doc.save(filename);
+            };
+
+            // ----- USER MANAGEMENT -----
+            function renderUsersGrid() {
+                const g = document.getElementById('usersGrid');
+                if (!g) return;
+                g.innerHTML = users.map(u => `<div class="grid-card">
+                    <h4 class="font-bold text-lg">${u.name}</h4>
+                    <p class="text-sm text-gray-500">@${u.username} · ${u.role}</p>
+                    <div class="flex gap-3 mt-5">
+                        <button class="bg-blue-500 text-white px-5 py-2 rounded-full text-sm" onclick="editUser('${u.id}')">Edit</button>
+                        ${u.username !== 'admin' ? `<button class="bg-red-500 text-white px-5 py-2 rounded-full text-sm" onclick="deleteUser('${u.id}')">Delete</button>` : ''}
+                    </div>
+                </div>`).join('');
             }
-        });
+            window.deleteUser = function(id) { if (confirm('Delete user?')) { users = users.filter(u => u.id !== id); saveUsers(); renderUsersGrid(); } };
+            window.editUser = function(id) { 
+                const u = users.find(x => x.id === id); 
+                if (!u) return; 
+                editingUserId = id; 
+                document.getElementById('editUsername').value = u.username; 
+                document.getElementById('editFullName').value = u.name; 
+                document.getElementById('editRole').value = u.role; 
+                document.getElementById('editUserForm').classList.remove('hidden'); 
+            };
+            window.cancelEditUser = function() { document.getElementById('editUserForm').classList.add('hidden'); editingUserId = null; };
+            window.updateUser = function() {
+                const u = users.find(x => x.id === editingUserId); 
+                if (!u) return; 
+                u.username = document.getElementById('editUsername').value; 
+                u.name = document.getElementById('editFullName').value; 
+                u.role = document.getElementById('editRole').value; 
+                const pw = document.getElementById('editPassword').value; 
+                if (pw) u.password = pw; 
+                saveUsers(); 
+                cancelEditUser(); 
+                renderUsersGrid(); 
+            };
+            window.addUser = function() {
+                const username = document.getElementById('newUsername').value;
+                const pw = document.getElementById('newPassword').value;
+                const name = document.getElementById('newFullName').value;
+                const role = document.getElementById('newRole').value;
+                if (!username || !pw || !name) return alert('All fields required');
+                const newUser = { id: 'user-'+Date.now(), username, password: pw, role, name };
+                users.push(newUser);
+                saveUsers();
+                renderUsersGrid();
+                document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('newFullName').value = '';
+            };
+
+            window.viewFile = function(data) { window.open(data); };
+
+            // start
+            document.addEventListener('DOMContentLoaded', checkAuth);
+        })();
     </script>
 </body>
 </html>

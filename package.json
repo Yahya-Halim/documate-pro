@@ -22,7 +22,15 @@
 
     "test": "vitest run",
 
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+
+    "server": "tsx server-sqlite.ts",
+
+    "server:dev": "tsx watch server-sqlite.ts",
+
+    "setup-db": "tsx -e \"import { initializeDatabase, testConnection } from './src/lib/database.js'; testConnection().then(() => initializeDatabase()).then(() => console.log('Database setup complete')).catch(console.error);",
+
+    "start": "concurrently \"npm run server:dev\" \"npm run dev\""
 
   },
 
@@ -86,19 +94,31 @@
 
     "@tanstack/react-query": "^5.83.0",
 
+    "better-sqlite3": "^12.6.2",
+
     "class-variance-authority": "^0.7.1",
 
     "clsx": "^2.1.1",
 
     "cmdk": "^1.1.1",
 
+    "cors": "^2.8.6",
+
     "date-fns": "^3.6.0",
 
+    "dotenv": "^17.3.1",
+
     "embla-carousel-react": "^8.6.0",
+
+    "express": "^5.2.1",
 
     "input-otp": "^1.4.2",
 
     "lucide-react": "^0.462.0",
+
+    "multer": "^2.1.1",
+
+    "mysql2": "^3.19.0",
 
     "next-themes": "^0.3.0",
 
@@ -118,6 +138,10 @@
 
     "sonner": "^1.7.4",
 
+    "sqlite": "^5.1.1",
+
+    "sqlite3": "^5.1.7",
+
     "tailwind-merge": "^2.6.0",
 
     "tailwindcss-animate": "^1.0.7",
@@ -132,11 +156,17 @@
 
     "@eslint/js": "^9.32.0",
 
+    "@tailwindcss/typography": "^0.5.16",
+
     "@testing-library/jest-dom": "^6.6.0",
 
     "@testing-library/react": "^16.0.0",
 
-    "@tailwindcss/typography": "^0.5.16",
+    "@types/cors": "^2.8.19",
+
+    "@types/express": "^5.0.6",
+
+    "@types/multer": "^2.1.0",
 
     "@types/node": "^22.16.5",
 
@@ -144,9 +174,13 @@
 
     "@types/react-dom": "^18.3.7",
 
+    "@types/sqlite3": "^3.1.11",
+
     "@vitejs/plugin-react-swc": "^3.11.0",
 
     "autoprefixer": "^10.4.21",
+
+    "concurrently": "^9.2.1",
 
     "eslint": "^9.32.0",
 
@@ -163,6 +197,8 @@
     "postcss": "^8.5.6",
 
     "tailwindcss": "^3.4.17",
+
+    "tsx": "^4.21.0",
 
     "typescript": "^5.8.3",
 

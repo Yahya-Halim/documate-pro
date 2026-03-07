@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useDocuments } from '@/hooks/useDocuments';
+import { useDocuments } from '@/hooks/useDocumentsApi';
 import { DocumentItem, downloadCSV } from '@/lib/documents';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Upload, FolderPlus, Download, Search, FileText, FolderOpen, Trash2 } from 'lucide-react';
 
 const Index = () => {
-  const { documents, folders, addDocument, updateDocument, deleteDocument, addFolder, deleteFolder } = useDocuments();
+  const { documents, folders, addDocument, updateDocument, deleteDocument, addFolder, deleteFolder, loading, error, refresh } = useDocuments();
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [editDoc, setEditDoc] = useState<DocumentItem | null>(null);
@@ -47,6 +47,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Error Display */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 text-destructive p-4 m-4 rounded-lg">
+          <p className="font-medium">Error: {error}</p>
+          <Button variant="outline" size="sm" onClick={refresh} className="mt-2">
+            Retry
+          </Button>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto flex items-center justify-between py-4 px-4">
@@ -56,15 +66,15 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-lg font-heading font-bold leading-tight">DocVault</h1>
-              <p className="text-xs text-muted-foreground">{documents.length} document{documents.length !== 1 ? 's' : ''}</p>
+              <p className="text-xs text-muted-foreground">{loading ? 'Loading...' : `${documents.length} document${documents.length !== 1 ? 's' : ''}`}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => downloadCSV(documents)} disabled={documents.length === 0}>
+            <Button variant="outline" size="sm" onClick={() => downloadCSV(documents)} disabled={documents.length === 0 || loading}>
               <Download className="h-4 w-4 mr-1.5" />
               <span className="hidden sm:inline">Export CSV</span>
             </Button>
-            <Button size="sm" onClick={() => setUploadOpen(true)}>
+            <Button size="sm" onClick={() => setUploadOpen(true)} disabled={loading}>
               <Upload className="h-4 w-4 mr-1.5" />
               Upload
             </Button>
