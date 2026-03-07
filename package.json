@@ -12,13 +12,17 @@
 
     "dev": "vite",
 
-    "build": "vite build",
+    "build": "tsc && vite build",
 
     "build:dev": "vite build --mode development",
+
+    "build:cloud": "tsc && vite build --mode production",
 
     "lint": "eslint .",
 
     "preview": "vite preview",
+
+    "deploy": "npm run build:cloud && git add . && git commit -m 'Deploy to GitHub Pages' && git push",
 
     "test": "vitest run",
 

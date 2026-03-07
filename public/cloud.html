@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FleetTracker - Cloud Document Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(8px);
+      border-radius: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255,255,255,0.1) inset;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-secondary { background: #6b7280; color: white; }
+    .btn-secondary:hover { background: #5a6268; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1 class="text-3xl font-bold text-gray-900 mb-6">🚚 FleetTracker</h1>
+      <p class="text-xl text-gray-600 mb-8">Cloud-Based Document Management System</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-900 mb-4">📄 Document Management</h2>
+          <p class="text-gray-600 mb-6">Upload, organize, and manage your fleet documents with automatic cloud sync.</p>
+          <a href="/documents" class="btn btn-primary">
+            <i class="fas fa-file-alt"></i>
+            Manage Documents
+          </a>
+        </div>
+        
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-900 mb-4">📁 Folder Organization</h2>
+          <p class="text-gray-600 mb-6">Create folders and organize documents by categories.</p>
+          <a href="/folders" class="btn btn-secondary">
+            <i class="fas fa-folder"></i>
+            Manage Folders
+          </a>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-900 mb-4">🌐 Cloud Sync</h2>
+          <p class="text-gray-600 mb-6">Your data is automatically synced across all devices via GitHub.</p>
+          <a href="/cloud" class="btn btn-primary">
+            <i class="fas fa-cloud"></i>
+            Cloud Dashboard
+          </a>
+        </div>
+        
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-900 mb-4">📊 Analytics</h2>
+          <p class="text-gray-600 mb-6">View insights and reports about your fleet operations.</p>
+          <a href="/analytics" class="btn btn-secondary">
+            <i class="fas fa-chart-bar"></i>
+            View Analytics
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-8 p-6 bg-blue-50 rounded-lg">
+        <h3 className="text-lg font-semibold text-blue-900 mb-4">🔧 Setup Instructions</h3>
+        <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700">
+          <li><strong>GitHub Token Required:</strong> Click "Cloud Dashboard" and setup your GitHub Personal Access Token</li>
+          <li><strong>Automatic Sync:</strong> All changes are automatically saved to GitHub</li>
+          <li><strong>Cross-Device Access:</strong> Access your data from any device with internet</li>
+          <li><strong>Offline Mode:</strong> If GitHub is unavailable, data is saved locally</li>
+          <li><strong>Data Security:</strong> Your data is stored in your GitHub repository</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
