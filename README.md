@@ -9,16 +9,21 @@ This guide will help you set up and run the complete Documate Pro application wi
 npm install
 ```
 
-### 2. Initialize Database
+### 2. Initialize Database (Local Version)
 ```bash
 node init-db.js
 ```
 
-### 3. Start the Application
-Run both the frontend and backend server concurrently:
+### 3. Start Application
 
+**Local Version (SQLite):**
 ```bash
 npm start
+```
+
+**Cloud Version (GitHub):**
+```bash
+npm run deploy
 ```
 
 Or run them separately:

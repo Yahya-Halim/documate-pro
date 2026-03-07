@@ -16,7 +16,7 @@
 
     "build:dev": "vite build --mode development",
 
-    "build:cloud": "tsc && vite build --mode production",
+    "build:cloud": "tsc && vite build --config vite.config.cloud.ts",
 
     "lint": "eslint .",
 
