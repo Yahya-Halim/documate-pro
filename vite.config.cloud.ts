@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     sourcemap: true,
     rollupOptions: {
       input: {
-        cloud: path.resolve(__dirname, "public/cloud.html")
+        main: path.resolve(__dirname, "index.html")
       },
       output: {
         entryFileNames: `assets/[name].js`,
