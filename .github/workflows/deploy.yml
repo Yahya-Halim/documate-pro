@@ -38,7 +38,7 @@ jobs:
       
     - name: Copy files to root
       run: |
-        cp dist-cloud/cloud.html dist-cloud/index.html
+        cp dist-cloud/index.html dist-cloud/cloud.html
         mkdir -p dist-cloud/assets
         cp -r dist-cloud/assets/* dist-cloud/ 2>/dev/null || true
         
