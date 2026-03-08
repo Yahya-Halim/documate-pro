@@ -465,18 +465,69 @@
                 container.innerHTML = html;
             };
 
-            window.showExpenseForm = function() {
-                document.getElementById('expenseForm').classList.remove('hidden');
+            window.showExpenseForm = function(expenseToEdit = null) {
+                const form = document.getElementById('expenseForm');
+                const formTitle = form.querySelector('h3');
+                
+                // Set form title based on whether we're editing or adding
+                if (expenseToEdit) {
+                    formTitle.textContent = '✏️ Edit Expense';
+                    formTitle.setAttribute('data-editing-id', expenseToEdit.id);
+                } else {
+                    formTitle.textContent = '➕ Add Expense (choose document type)';
+                    formTitle.removeAttribute('data-editing-id');
+                }
+                
+                form.classList.remove('hidden');
                 const typeSel = document.getElementById('documentType');
                 if (typeSel && typeSel.options.length === 1) {
                     typeSel.innerHTML = '<option value="">Select document type</option>';
                     tags.forEach(t => typeSel.innerHTML += `<option value="${t.id}">${t.name}</option>`);
+                }
+                
+                // If editing, populate the form
+                if (expenseToEdit) {
+                    document.getElementById('expenseTitle').value = expenseToEdit.title || '';
+                    document.getElementById('expenseAmount').value = expenseToEdit.amount || '';
+                    document.getElementById('expenseDescription').value = expenseToEdit.description || '';
+                    document.getElementById('documentType').value = expenseToEdit.document_type || '';
+                    
+                    // Populate driver if admin
+                    if (currentUser.role === 'admin' && expenseToEdit.driver_id) {
+                        document.getElementById('expenseDriver').value = expenseToEdit.driver_id;
+                    }
+                    
+                    // Render and populate document-specific fields
+                    renderDocumentFields();
+                    if (documentTypeFields[expenseToEdit.document_type]) {
+                        documentTypeFields[expenseToEdit.document_type].forEach(f => {
+                            const inp = document.getElementById(`field_${f.id}`);
+                            if (inp && expenseToEdit[f.id]) {
+                                inp.value = expenseToEdit[f.id];
+                            }
+                        });
+                    }
                 }
             };
             window.hideExpenseForm = function() { 
                 document.getElementById('expenseForm').classList.add('hidden'); 
                 uploadedFile = null;
                 document.getElementById('fileInfo').innerHTML = '';
+                
+                // Clear form and editing state
+                document.getElementById('expenseTitle').value = '';
+                document.getElementById('expenseAmount').value = '';
+                document.getElementById('expenseDescription').value = '';
+                document.getElementById('documentType').value = '';
+                
+                // Clear document-specific fields
+                const container = document.getElementById('documentFieldsContainer');
+                if (container) container.innerHTML = '';
+                
+                // Reset form title and clear editing state
+                const formTitle = document.querySelector('#expenseForm h3');
+                formTitle.textContent = '➕ Add Expense (choose document type)';
+                formTitle.removeAttribute('data-editing-id');
             };
             window.handleFileSelect = function(e) {
                 const file = e.target.files[0];
@@ -519,8 +570,11 @@
                     }
                 }
                 
-                const newExp = {
-                    id: 'exp-' + Date.now(),
+                // Check if we're editing an existing expense
+                const formTitle = document.querySelector('#expenseForm h3');
+                const editingId = formTitle.getAttribute('data-editing-id');
+                
+                let expenseData = {
                     title: title,
                     amount: amount,
                     description: desc || '',
@@ -528,27 +582,56 @@
                     driver_id: driverId,
                     driver_name: driverName,
                     driver_username: driverUsername,
-                    created_at: new Date().toISOString(),
                     ...fieldVals
                 };
                 
-                console.log('New expense object:', newExp); // Debug log
+                if (editingId) {
+                    // Update existing expense
+                    const expenseIndex = expenses.findIndex(e => e.id === editingId);
+                    if (expenseIndex !== -1) {
+                        expenses[expenseIndex] = { ...expenses[expenseIndex], ...expenseData };
+                        console.log('Updated expense:', expenses[expenseIndex]); // Debug log
+                    }
+                } else {
+                    // Create new expense
+                    expenseData.id = 'exp-' + Date.now();
+                    expenseData.created_at = new Date().toISOString();
+                    console.log('New expense object:', expenseData); // Debug log
+                }
                 
-                if (uploadedFile) {
-                    fileToBase64(uploadedFile, (b64) => {
-                        newExp.receipt_url = { name: uploadedFile.name, type: uploadedFile.type, data: b64 };
-                        expenses.push(newExp);
+                const handleSave = (finalExpense) => {
+                    if (editingId) {
+                        // Already updated in place
+                        saveExpenses();
+                        hideExpenseForm();
+                        renderExpenses();
+                        alert('Expense updated successfully!');
+                    } else {
+                        // Add new expense
+                        expenses.push(finalExpense);
                         saveExpenses();
                         hideExpenseForm();
                         renderExpenses();
                         alert('Expense saved successfully!');
+                    }
+                };
+                
+                if (uploadedFile) {
+                    fileToBase64(uploadedFile, (b64) => {
+                        const finalExpense = editingId ? 
+                            expenses.find(e => e.id === editingId) : 
+                            { ...expenseData, receipt_url: { name: uploadedFile.name, type: uploadedFile.type, data: b64 } };
+                        
+                        if (!editingId) {
+                            finalExpense.receipt_url = { name: uploadedFile.name, type: uploadedFile.type, data: b64 };
+                        } else {
+                            finalExpense.receipt_url = { name: uploadedFile.name, type: uploadedFile.type, data: b64 };
+                        }
+                        
+                        handleSave(finalExpense);
                     });
                 } else {
-                    expenses.push(newExp);
-                    saveExpenses();
-                    hideExpenseForm();
-                    renderExpenses();
-                    alert('Expense saved successfully!');
+                    handleSave(editingId ? expenses.find(e => e.id === editingId) : expenseData);
                 }
             };
 
@@ -643,7 +726,8 @@
                 
                 summaryHtml += `
                             </div>
-                            <div class="flex justify-end mt-6">
+                            <div class="flex justify-end mt-6 gap-3">
+                                <button class="btn-primary" onclick="editExpense('${expense.id}')">Edit</button>
                                 <button class="btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
                             </div>
                         </div>
@@ -651,6 +735,18 @@
                 `;
                 
                 document.body.insertAdjacentHTML('beforeend', summaryHtml);
+            };
+
+            // Edit expense function
+            window.editExpense = function(id) {
+                const expense = expenses.find(e => e.id === id);
+                if (!expense) return;
+                
+                // Close the view modal
+                document.querySelectorAll('.modal').forEach(modal => modal.remove());
+                
+                // Show the edit form
+                showExpenseForm(expense);
             };
 
             window.renderExpenses = function() {
