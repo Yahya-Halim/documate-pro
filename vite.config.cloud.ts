@@ -11,10 +11,10 @@ export default defineConfig(({ mode }) => ({
     sourcemap: true,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, "public/cloud.html")
+        cloud: path.resolve(__dirname, "public/cloud.html")
       },
       output: {
-        entryFileNames: `[name].html`,
+        entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name].js`,
         assetFileNames: `assets/[name].[ext]`
       }
