@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FleetTracker - Cloud Document Management</title>
+  <title>FleetTracker - Cloud Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -42,58 +42,85 @@
     .btn-primary:hover { background: #2563eb; }
     .btn-secondary { background: #6b7280; color: white; }
     .btn-secondary:hover { background: #5a6268; }
+    .btn-green { background: #10b981; color: white; }
+    .btn-green:hover { background: #059669; }
+    .btn-red { background: #ef4444; color: white; }
+    .btn-red:hover { background: #dc2626; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
-      <h1 class="text-3xl font-bold text-gray-900 mb-6">🚚 FleetTracker</h1>
-      <p class="text-xl text-gray-600 mb-8">Cloud-Based Document Management System</p>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">📄 Document Management</h2>
-          <p class="text-gray-600 mb-6">Upload, organize, and manage your fleet documents with automatic cloud sync.</p>
-          <a href="/documents" class="btn btn-primary">
-            <i class="fas fa-file-alt"></i>
-            Manage Documents
-          </a>
-        </div>
-        
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">📁 Folder Organization</h2>
-          <p class="text-gray-600 mb-6">Create folders and organize documents by categories.</p>
-          <a href="/folders" class="btn btn-secondary">
-            <i class="fas fa-folder"></i>
-            Manage Folders
-          </a>
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">🚚 FleetTracker - Cloud Dashboard</h1>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <div id="syncStatus" class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <span id="syncText" class="text-sm font-medium">� Checking sync status...</span>
+          </div>
+          <button id="setupToken" class="btn btn-primary">
+            <i class="fas fa-key"></i>
+            Setup GitHub Token
+          </button>
+          <button id="forceSync" class="btn btn-green">
+            <i class="fas fa-sync"></i>
+            Force Sync
+          </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">🌐 Cloud Sync</h2>
-          <p class="text-gray-600 mb-6">Your data is automatically synced across all devices via GitHub.</p>
-          <a href="/cloud" class="btn btn-primary">
-            <i class="fas fa-cloud"></i>
-            Cloud Dashboard
-          </a>
-        </div>
-        
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">📊 Analytics</h2>
-          <p class="text-gray-600 mb-6">View insights and reports about your fleet operations.</p>
-          <a href="/analytics" class="btn btn-secondary">
-            <i class="fas fa-chart-bar"></i>
-            View Analytics
-          </a>
+      <!-- Sync Status -->
+      <div id="syncInfo" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 hidden">
+        <div class="flex items-center justify-between">
+          <span id="lastSync" class="text-sm text-blue-700">
+            📅 Last Sync: Never
+          </span>
+          <span id="syncStatusText" class="text-xs text-green-600 hidden">
+            ✅ Data shared across all devices
+          </span>
         </div>
       </div>
 
-      <div class="mt-8 p-6 bg-blue-50 rounded-lg">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">🔧 Setup Instructions</h3>
+      <div id="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 hidden">
+        <span class="text-sm text-red-700">⚠️ <span id="errorText"></span></span>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">📄 Documents</h3>
+          <p id="docCount" class="text-3xl font-bold text-blue-600">0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">📁 Folders</h3>
+          <p id="folderCount" class="text-3xl font-bold text-green-600">0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">🌐 Sync Status</h3>
+          <p id="statusText" class="text-lg font-bold">⚠️ Checking...</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button onclick="window.open('/documents', '_blank')" class="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 text-left btn">
+            <h3 class="font-semibold text-blue-900">📄 Manage Documents</h3>
+            <p class="text-sm text-gray-600 mt-1">Upload, edit, and organize your documents</p>
+          </button>
+          <button onclick="window.open('/folders', '_blank')" class="p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 text-left btn">
+            <h3 class="font-semibold text-green-900">📁 Manage Folders</h3>
+            <p class="text-sm text-gray-600 mt-1">Create and organize folders</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mt-8">
+        <h2 class="text-lg font-semibold text-yellow-900 mb-4">� How to Use</h2>
         <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700">
-          <li><strong>GitHub Token Required:</strong> Click "Cloud Dashboard" and setup your GitHub Personal Access Token</li>
+          <li><strong>GitHub Token Required:</strong> Click "Setup GitHub Token" to connect to your GitHub repository</li>
           <li><strong>Automatic Sync:</strong> All changes are automatically saved to GitHub</li>
           <li><strong>Cross-Device Access:</strong> Access your data from any device with internet</li>
           <li><strong>Offline Mode:</strong> If GitHub is unavailable, data is saved locally</li>
@@ -102,5 +129,175 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Cloud Storage Implementation
+    const CLOUD_STORAGE_KEY = 'fleettracker_cloud_data';
+    const SYNC_ENDPOINT = 'https://api.github.com/repos/Yahya-Halim/documate-pro/contents/data.json';
+    
+    let currentData = {
+      documents: [],
+      folders: [],
+      lastSync: null
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      loadData();
+      setupEventListeners();
+    });
+
+    function setupEventListeners() {
+      document.getElementById('setupToken').addEventListener('click', setupGitHubToken);
+      document.getElementById('forceSync').addEventListener('click', forceSync);
+    }
+
+    async function loadData() {
+      try {
+        const token = localStorage.getItem('github_token');
+        if (token) {
+          await loadFromGitHub();
+        } else {
+          loadFromLocalStorage();
+          updateSyncStatus(false, 'GitHub token not set');
+        }
+      } catch (error) {
+        console.error('Load error:', error);
+        loadFromLocalStorage();
+        updateSyncStatus(false, 'Failed to load from GitHub');
+      }
+    }
+
+    async function loadFromGitHub() {
+      try {
+        const token = localStorage.getItem('github_token');
+        const response = await fetch(SYNC_ENDPOINT, {
+          headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (response.ok) {
+          const githubData = await response.json();
+          if (githubData.content) {
+            currentData = JSON.parse(atob(githubData.content));
+            localStorage.setItem(CLOUD_STORAGE_KEY, JSON.stringify(currentData));
+            updateUI();
+            updateSyncStatus(true, 'Connected to GitHub');
+          }
+        } else {
+          throw new Error('GitHub API error');
+        }
+      } catch (error) {
+        console.error('GitHub load failed:', error);
+        loadFromLocalStorage();
+        updateSyncStatus(false, 'Failed to sync with GitHub');
+      }
+    }
+
+    function loadFromLocalStorage() {
+      const localData = localStorage.getItem(CLOUD_STORAGE_KEY);
+      if (localData) {
+        currentData = JSON.parse(localData);
+      }
+      updateUI();
+    }
+
+    async function saveToCloud() {
+      try {
+        const token = localStorage.getItem('github_token');
+        if (!token) {
+          showError('GitHub token not set. Please setup token first.');
+          return;
+        }
+
+        const dataToSave = {
+          ...currentData,
+          lastSync: new Date().toISOString()
+        };
+
+        const response = await fetch(SYNC_ENDPOINT, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Update data ${new Date().toISOString()}`,
+            content: btoa(JSON.stringify(dataToSave, null, 2))
+          })
+        });
+
+        if (response.ok) {
+          currentData = dataToSave;
+          localStorage.setItem(CLOUD_STORAGE_KEY, JSON.stringify(currentData));
+          updateUI();
+          updateSyncStatus(true, 'Successfully synced to GitHub');
+        } else {
+          throw new Error('Failed to save to GitHub');
+        }
+      } catch (error) {
+        console.error('Save to cloud failed:', error);
+        showError('Failed to sync with GitHub. Data saved locally only.');
+        
+        // Save locally as fallback
+        localStorage.setItem(CLOUD_STORAGE_KEY, JSON.stringify(currentData));
+      }
+    }
+
+    function setupGitHubToken() {
+      const token = prompt('Enter your GitHub Personal Access Token:', localStorage.getItem('github_token') || '');
+      if (token) {
+        localStorage.setItem('github_token', token);
+        loadData(); // Retry loading with new token
+      }
+    }
+
+    async function forceSync() {
+      updateSyncStatus(false, 'Syncing...');
+      await loadData();
+    }
+
+    function updateUI() {
+      document.getElementById('docCount').textContent = currentData.documents.length;
+      document.getElementById('folderCount').textContent = currentData.folders.length;
+      
+      const syncInfo = document.getElementById('syncInfo');
+      const lastSync = document.getElementById('lastSync');
+      if (currentData.lastSync) {
+        syncInfo.classList.remove('hidden');
+        lastSync.textContent = `📅 Last Sync: ${new Date(currentData.lastSync).toLocaleString()}`;
+      }
+    }
+
+    function updateSyncStatus(isOnline, message) {
+      const statusDot = document.getElementById('syncStatus');
+      const statusText = document.getElementById('syncText');
+      const syncStatusText = document.getElementById('syncStatusText');
+      const statusTextEl = document.getElementById('statusText');
+
+      if (isOnline) {
+        statusDot.className = 'w-3 h-3 rounded-full bg-green-500';
+        statusText.textContent = '🌐 Connected to GitHub';
+        syncStatusText.classList.remove('hidden');
+        statusTextEl.innerHTML = '<span class="text-green-600">✅ Online</span>';
+      } else {
+        statusDot.className = 'w-3 h-3 rounded-full bg-yellow-500';
+        statusText.textContent = '📱 Local Mode';
+        syncStatusText.classList.add('hidden');
+        statusTextEl.innerHTML = '<span class="text-yellow-600">⚠️ Offline</span>';
+      }
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+      errorText.textContent = message;
+      errorDiv.classList.remove('hidden');
+      setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+    }
+  </script>
 </body>
 </html>
